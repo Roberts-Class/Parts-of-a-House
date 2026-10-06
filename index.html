@@ -255,7 +255,7 @@
                     </div>
                 </div>
                 <h3 class="text-2xl font-bold text-slate-800">Generating AI Room Visual...</h3>
-                <p class="text-sm font-sans text-slate-500 max-w-md">Our AI designer is converting your selected furniture items into a 3D picture!</p>
+                <p id="ai-loading-desc" class="text-sm font-sans text-slate-500 max-w-md">Our AI designer is converting your selected furniture items into a 3D picture!</p>
             </div>
 
             <!-- Result State -->
@@ -1002,14 +1002,14 @@
         }
 
         /* ==========================================================================
-           AI ROOM IMAGE GENERATION (With Instant Preloader & Dual Engine Fallback)
+           ROBUST AI ROOM IMAGE GENERATION (Multi-Engine Fallback Chain)
            ========================================================================== */
         async function generateAIRoomImage() {
             const room = ROOMS[gameState.currentRoomIndex];
             const roomProg = gameState.roomData[room.id];
-            const placed = roomProg.placedItems;
+            const placed = roomProg ? roomProg.placedItems : [];
 
-            if (placed.length === 0) {
+            if (!placed || placed.length === 0) {
                 speakText("Please place some items in the room first!");
                 const feedback = document.getElementById('feedback-text');
                 if (feedback) {
@@ -1036,15 +1036,17 @@
             if (errorState) errorState.classList.add('hidden');
             
             const aiTitle = document.getElementById('ai-room-title');
-            if (aiTitle) aiTitle.innerText = `${room.name} Visualization`;
+            if (aiTitle) aiTitle.innerText = `${room.name} Visualizer`;
 
             speakText(`Generating an AI picture for your ${room.name}...`);
 
-            const cleanPrompt = `A vibrant, highly detailed 3D styled Pixar aesthetic architectural interior render of a ${room.name} with items: ${itemNames.join(', ')}. Cozy lighting, cute classroom game style, wide shot.`;
+            const cleanPrompt = `Cute 3d interior render of a colorful ${room.name} with ${itemNames.join(', ')}, bright lighting, Pixar style`;
+            const encodedPrompt = encodeURIComponent(cleanPrompt);
+            const cacheBuster = Date.now() + Math.floor(Math.random() * 1000);
 
             const apiKey = getStoredApiKey();
 
-            // 1. TRY GEMINI IMAGEN API IF KEY IS SAVED
+            // 1. TRY GEMINI IMAGEN API IF KEY IS AVAILABLE
             if (apiKey) {
                 try {
                     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:generateImages?key=${apiKey}`;
@@ -1063,21 +1065,73 @@
                         const result = await response.json();
                         const base64Data = result?.predictions?.[0]?.bytesBase64Encoded;
                         if (base64Data) {
-                            displayAiImage(`data:image/png;base64,${base64Data}`, `${room.name} (Gemini AI)`);
+                            displayAiImage(`data:image/png;base64,${base64Data}`);
                             return;
                         }
                     }
                 } catch (err) {
-                    console.warn("Gemini API call failed, switching to instant AI engine fallback...", err);
+                    console.warn("Gemini API call failed, falling back to instant engines...", err);
                 }
             }
 
-            // 2. FALLBACK INSTANT RENDER ENGINE (Guarantees image generation without API errors)
-            const fallbackUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=1280&height=720&seed=${Math.floor(Math.random() * 99999)}&nologo=true`;
-            displayAiImage(fallbackUrl, `${room.name} (AI Render)`);
+            // 2. MULTI-ENGINE FALLBACK CHAIN WITH TIMEOUT PROTECTION
+            const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=576&seed=${cacheBuster}&nologo=true`;
+            const unsplashUrl = `https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1024&q=80`;
+
+            tryLoadImageSources([
+                pollinationsUrl,
+                unsplashUrl,
+                () => generateCanvasRoomFallback(room.name, itemNames)
+            ]);
         }
 
-        function displayAiImage(url, titleText) {
+        function tryLoadImageSources(sources, index = 0) {
+            if (index >= sources.length) {
+                showAiError();
+                return;
+            }
+
+            const source = sources[index];
+
+            // Pure Javascript Canvas Renderer Guarantee (Works 100% offline or on blocked networks)
+            if (typeof source === 'function') {
+                const dataUrl = source();
+                displayAiImage(dataUrl);
+                return;
+            }
+
+            const img = new Image();
+            let isDone = false;
+
+            // 6-second timeout per external image service
+            const timer = setTimeout(() => {
+                if (!isDone) {
+                    isDone = true;
+                    img.src = "";
+                    tryLoadImageSources(sources, index + 1);
+                }
+            }, 6000);
+
+            img.onload = function() {
+                if (!isDone) {
+                    isDone = true;
+                    clearTimeout(timer);
+                    displayAiImage(source);
+                }
+            };
+
+            img.onerror = function() {
+                if (!isDone) {
+                    isDone = true;
+                    clearTimeout(timer);
+                    tryLoadImageSources(sources, index + 1);
+                }
+            };
+
+            img.src = source;
+        }
+
+        function displayAiImage(url) {
             const loadingState = document.getElementById('ai-loading-state');
             const resultState = document.getElementById('ai-result-state');
             const errorState = document.getElementById('ai-error-state');
@@ -1085,28 +1139,85 @@
 
             if (!imgElem) return;
 
-            const tempImg = new Image();
-            tempImg.onload = function() {
-                imgElem.src = url;
-                if (loadingState) loadingState.classList.add('hidden');
-                if (resultState) resultState.classList.remove('hidden');
-                if (errorState) errorState.classList.add('hidden');
+            imgElem.src = url;
+            if (loadingState) loadingState.classList.add('hidden');
+            if (resultState) resultState.classList.remove('hidden');
+            if (errorState) errorState.classList.add('hidden');
 
-                playSoundFx('fanfare');
-                speakText(`Here is your AI generated picture!`);
-            };
+            playSoundFx('fanfare');
+            speakText(`Here is your AI generated picture!`);
+        }
 
-            tempImg.onerror = function() {
-                if (loadingState) loadingState.classList.add('hidden');
-                if (resultState) resultState.classList.add('hidden');
-                if (errorState) errorState.classList.remove('hidden');
-            };
+        function showAiError() {
+            const loadingState = document.getElementById('ai-loading-state');
+            const resultState = document.getElementById('ai-result-state');
+            const errorState = document.getElementById('ai-error-state');
 
-            tempImg.src = url;
+            if (loadingState) loadingState.classList.add('hidden');
+            if (resultState) resultState.classList.add('hidden');
+            if (errorState) errorState.classList.remove('hidden');
+        }
+
+        /* PROCEDURAL CANVAS FALLBACK visualizer (Zero Network Failures) */
+        function generateCanvasRoomFallback(roomName, items) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 576;
+            const ctx = canvas.getContext('2d');
+
+            // Rich Gradient Background
+            const bgGrad = ctx.createLinearGradient(0, 0, 0, 576);
+            bgGrad.addColorStop(0, '#1e1b4b');
+            bgGrad.addColorStop(0.6, '#312e81');
+            bgGrad.addColorStop(1, '#0f172a');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, 1024, 576);
+
+            // Title Heading
+            ctx.fillStyle = '#fef08a';
+            ctx.font = 'bold 44px Fredoka, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(`✨ ${roomName} Showcase Design ✨`, 512, 90);
+
+            // Item summary text
+            ctx.fillStyle = '#cbd5e1';
+            ctx.font = '22px Inter, sans-serif';
+            ctx.fillText(`Decorated with ${items.length} key furniture pieces!`, 512, 140);
+
+            // Render Item Cards
+            const total = items.length;
+            const startY = 200;
+
+            items.forEach((item, idx) => {
+                const col = idx % 4;
+                const row = Math.floor(idx / 4);
+                const x = 140 + col * 200;
+                const y = startY + row * 120;
+
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.lineWidth = 2;
+                
+                ctx.beginPath();
+                if (ctx.roundRect) {
+                    ctx.roundRect(x, y, 180, 95, 20);
+                } else {
+                    ctx.rect(x, y, 180, 95);
+                }
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 20px Fredoka, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(item, x + 90, y + 55);
+            });
+
+            return canvas.toDataURL('image/png');
         }
 
         /* ==========================================================================
-           ROOM RATING LOGIC & CELEBRATION
+           REFINED FLEXIBLE ROOM RATING LOGIC
            ========================================================================== */
         function checkAndRateRoom() {
             const room = ROOMS[gameState.currentRoomIndex];
@@ -1122,21 +1233,29 @@
                 return;
             }
 
-            let correctCount = 0;
-            let incorrectCount = 0;
+            let keyRoomItemCount = 0;
+            let creativeAdditionCount = 0;
 
             placed.forEach(p => {
                 if (room.targetItemIds.includes(p.id)) {
-                    correctCount++;
+                    keyRoomItemCount++;
                 } else {
-                    incorrectCount++;
+                    creativeAdditionCount++;
                 }
             });
 
+            // Encouraging, non-punitive grading logic:
+            // - 3 Stars: Decorating with 3+ items where at least 2 are key room items.
+            // - 2 Stars: Decorating with at least 2 items.
+            // - 1 Star:  1 item placed (encourages adding more furniture).
             let stars = 1;
-            if (correctCount >= 3 && incorrectCount === 0) stars = 3;
-            else if (correctCount >= 2 && incorrectCount <= 1) stars = 2;
-            else stars = 1;
+            if (placed.length >= 3 && keyRoomItemCount >= 2) {
+                stars = 3;
+            } else if (placed.length >= 2) {
+                stars = 2;
+            } else {
+                stars = 1;
+            }
 
             roomProg.stars = Math.max(roomProg.stars, stars);
             updateTotalStarsHeader();
@@ -1153,13 +1272,18 @@
             const starsContainer = document.getElementById('modal-stars-container');
             if (starsContainer) starsContainer.innerHTML = starsHTML;
 
-            let feedbackMsg = "Awesome design! All items belong in this room!";
-            if (stars === 2) feedbackMsg = "Great job! You furnished a wonderful room!";
-            if (stars === 1) feedbackMsg = "Nice try! Some items might belong in other rooms!";
+            // Positive, growth-oriented feedback messaging
+            let feedbackMsg = `Great design! You included ${keyRoomItemCount} key room item${keyRoomItemCount === 1 ? '' : 's'}`;
+            if (creativeAdditionCount > 0) {
+                feedbackMsg += ` and ${creativeAdditionCount} creative touch${creativeAdditionCount > 1 ? 'es' : ''}!`;
+            } else {
+                feedbackMsg += `! Perfectly themed!`;
+            }
 
             const feedbackElem = document.getElementById('modal-feedback-msg');
             if (feedbackElem) feedbackElem.innerText = feedbackMsg;
 
+            // Clear visual distinction in summary list (Key Item vs Creative Addition)
             const listContainer = document.getElementById('modal-placed-list');
             if (listContainer) {
                 listContainer.innerHTML = '';
@@ -1171,9 +1295,9 @@
                             <span class="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold border flex items-center gap-1.5 ${
                                 isTarget 
                                     ? 'bg-emerald-50 text-emerald-700 border-emerald-300' 
-                                    : 'bg-amber-50 text-amber-700 border-amber-300'
+                                    : 'bg-indigo-50 text-indigo-700 border-indigo-300'
                             }">
-                                ${itemObj.icon} ${itemObj.name} ${isTarget ? '✓' : ''}
+                                ${itemObj.icon} ${itemObj.name} ${isTarget ? '✓ Key Item' : '✨ Creative Touch'}
                             </span>
                         `;
                     }
