@@ -34,7 +34,7 @@
             padding: 0;
             overflow: hidden;
             font-family: 'Fredoka', sans-serif;
-            background: #0f172a; /* Dark sleek classroom screen frame */
+            background: #0f172a;
             user-select: none;
         }
 
@@ -47,7 +47,6 @@
         .theme-garden { background: linear-gradient(to bottom, #38bdf8 0%, #bae6fd 55%, #4ade80 55%, #15803d 100%); }
         .theme-swimming_pool { background: linear-gradient(to bottom, #e0f2fe 0%, #7dd3fc 45%, #0284c7 45%, #075985 100%); }
 
-        /* Draggable item animation & styling inside canvas */
         .placed-canvas-item {
             position: absolute;
             cursor: grab;
@@ -67,10 +66,9 @@
             border: 2px solid rgba(255, 255, 255, 0.8);
         }
 
-        /* Custom Scrollbars */
         .custom-scrollbar::-webkit-scrollbar {
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
             background: rgba(0, 0, 0, 0.05);
@@ -79,9 +77,6 @@
         .custom-scrollbar::-webkit-scrollbar-thumb {
             background: rgba(99, 102, 241, 0.5);
             border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: rgba(99, 102, 241, 0.8);
         }
 
         @keyframes pop {
@@ -99,10 +94,7 @@
 </head>
 <body class="h-full w-full flex flex-col bg-slate-900 text-slate-800">
 
-    <!-- TOP HEADER NAVBAR (Compact for Smart Board TV) -->
     <header class="w-full bg-slate-800 border-b border-slate-700 px-4 py-2 flex items-center justify-between gap-3 shrink-0">
-        
-        <!-- Logo & Title -->
         <div class="flex items-center gap-3">
             <div class="bg-gradient-to-tr from-pink-500 to-amber-400 text-white p-2.5 rounded-2xl shadow-md transform -rotate-2">
                 <i class="fa-solid fa-couch text-2xl"></i>
@@ -115,19 +107,14 @@
             </div>
         </div>
 
-        <!-- Room Selector Dropdown Pills -->
-        <div id="room-nav-pills" class="flex items-center gap-2 overflow-x-auto custom-scrollbar py-1">
-            <!-- Dynamic room navigation tabs injected here -->
-        </div>
+        <div id="room-nav-pills" class="flex items-center gap-2 overflow-x-auto custom-scrollbar py-1"></div>
 
-        <!-- Right Controls: Score Stars & Audio Toggle -->
         <div class="flex items-center gap-3">
             <div class="bg-amber-500/20 border border-amber-500/40 text-amber-300 px-4 py-1.5 rounded-2xl flex items-center gap-2 text-base font-bold shadow-sm">
                 <i class="fa-solid fa-star text-amber-400 text-lg"></i>
                 <span id="total-stars-count">0</span> / 21
             </div>
 
-            <!-- GitHub Pages API Key Config Button -->
             <button onclick="openApiKeyModal()" class="w-11 h-11 rounded-2xl bg-slate-700 hover:bg-slate-600 text-amber-300 flex items-center justify-center transition shadow-md text-lg" title="Configure Gemini API Key">
                 <i class="fa-solid fa-key"></i>
             </button>
@@ -138,13 +125,10 @@
         </div>
     </header>
 
-    <!-- MAIN SCREEN GRID CONTAINER -->
     <main class="flex-1 w-full p-3 grid grid-cols-12 gap-3 overflow-hidden">
 
-        <!-- LEFT COLUMN: Room Canvas Stage (7 Columns) -->
+        <!-- Stage Column -->
         <section class="col-span-7 flex flex-col h-full gap-2 min-h-0">
-            
-            <!-- Room Header Banner -->
             <div class="glass-panel px-4 py-2.5 rounded-2xl flex items-center justify-between shadow-md shrink-0">
                 <div class="flex items-center gap-3">
                     <div id="room-badge-icon" class="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-xl shadow-md">
@@ -152,16 +136,13 @@
                     </div>
                     <div>
                         <span class="text-[10px] uppercase font-bold text-indigo-600 tracking-wider font-sans block">Current Room:</span>
-                        <h2 id="room-title-heading" class="text-2xl font-bold text-slate-800 leading-none">
-                            Bedroom
-                        </h2>
+                        <h2 id="room-title-heading" class="text-2xl font-bold text-slate-800 leading-none">Bedroom</h2>
                     </div>
-                    <button onclick="speakCurrentRoomName()" class="w-9 h-9 rounded-xl bg-indigo-100 hover:bg-indigo-200 text-indigo-600 flex items-center justify-center transition shadow-sm ml-1" title="Listen to room name">
+                    <button onclick="speakCurrentRoomName()" class="w-9 h-9 rounded-xl bg-indigo-100 hover:bg-indigo-200 text-indigo-600 flex items-center justify-center transition shadow-sm ml-1">
                         <i class="fa-solid fa-volume-high text-sm"></i>
                     </button>
                 </div>
 
-                <!-- Canvas Action Controls -->
                 <div class="flex items-center gap-2">
                     <button onclick="clearCanvas()" class="px-3 py-2 bg-slate-100 hover:bg-rose-100 text-slate-700 hover:text-rose-600 rounded-xl font-bold text-sm transition flex items-center gap-1.5 border border-slate-300 shadow-sm">
                         <i class="fa-solid fa-trash-can"></i>
@@ -180,33 +161,24 @@
                 </div>
             </div>
 
-            <!-- ROOM DECORATING CANVAS STAGE -->
             <div id="room-canvas" 
                  ondragover="handleDragOver(event)" 
                  ondragleave="handleDragLeave(event)" 
                  ondrop="handleDrop(event)"
                  class="w-full flex-1 rounded-3xl border-4 border-dashed border-white/80 relative transition-all duration-300 shadow-2xl theme-bedroom overflow-hidden flex flex-col justify-end p-4 min-h-0">
-                
-                <!-- Placed Canvas Items Container -->
-                <div id="placed-items-layer" class="absolute inset-0 z-10">
-                    <!-- Dynamic placed furniture items go here -->
-                </div>
+                <div id="placed-items-layer" class="absolute inset-0 z-10"></div>
             </div>
 
-            <!-- Canvas Status / Feedback Text Bar -->
             <div class="glass-panel px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm shrink-0">
                 <i class="fa-solid fa-circle-info text-indigo-600 text-lg"></i>
                 <p id="feedback-text" class="text-sm font-bold text-slate-700">
                     Select items from the catalog to decorate!
                 </p>
             </div>
-
         </section>
 
-        <!-- RIGHT COLUMN: Items & Furniture Catalog Tray (5 Columns) -->
+        <!-- Catalog Sidebar -->
         <aside class="col-span-5 glass-panel rounded-3xl p-3 flex flex-col h-full gap-3 shadow-2xl min-h-0">
-            
-            <!-- Category Filter Tabs -->
             <div class="grid grid-cols-5 gap-1.5 p-1 bg-slate-100/80 rounded-2xl border border-slate-200/80 text-xs shrink-0">
                 <button id="cat-furniture" onclick="filterCategory('furniture')" class="py-2 rounded-xl transition flex flex-col items-center gap-1 bg-white text-indigo-600 shadow-sm border border-slate-200 font-bold">
                     <i class="fa-solid fa-chair text-base"></i>
@@ -230,15 +202,11 @@
                 </button>
             </div>
 
-            <!-- Items Catalog Grid -->
-            <div id="catalog-grid" class="flex-1 overflow-y-auto custom-scrollbar grid grid-cols-3 sm:grid-cols-4 gap-2.5 p-1 align-content-start">
-                <!-- Dynamic items rendered here -->
-            </div>
+            <div id="catalog-grid" class="flex-1 overflow-y-auto custom-scrollbar grid grid-cols-3 sm:grid-cols-4 gap-2.5 p-1 align-content-start"></div>
         </aside>
 
     </main>
 
-    <!-- AI ROOM GENERATION MODAL (Includes Direct Gemini Launch & Prompt Copy) -->
     <div id="modal-ai-preview" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-2xl w-full p-6 text-center shadow-2xl animate-pop border-2 border-indigo-100 relative overflow-hidden">
             
@@ -246,65 +214,56 @@
                 <i class="fa-solid fa-xmark"></i>
             </button>
 
-            <!-- Gemini Direct Prompt Box & Launch Options -->
             <div class="flex flex-col gap-4">
                 <div class="flex items-center justify-between border-b pb-3 border-slate-100">
                     <div class="flex items-center gap-2">
-                        <span class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider font-sans flex items-center gap-1">
-                            <i class="fa-solid fa-sparkles text-amber-300"></i> Gemini 3D Studio
+                        <span class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider font-sans flex items-center gap-1">
+                            <i class="fa-solid fa-sparkles text-amber-300"></i> Gemini AI Studio
                         </span>
                         <h3 id="ai-room-title" class="text-xl font-bold text-slate-800">AI Room Visualizer</h3>
                     </div>
-                    <button onclick="openApiKeyModal()" class="text-xs text-indigo-600 font-bold hover:underline flex items-center gap-1 font-sans">
-                        <i class="fa-solid fa-key"></i> Direct API Settings
+                </div>
+
+                <!-- Primary Banner Option: Direct Gemini Web Button -->
+                <div class="bg-gradient-to-br from-indigo-900 via-slate-900 to-purple-950 border-2 border-indigo-500/50 rounded-2xl p-5 text-white flex flex-col items-center gap-3 shadow-xl">
+                    <div class="flex items-center gap-2 text-amber-300 font-bold text-lg">
+                        <i class="fa-solid fa-rocket text-xl"></i>
+                        <span>Generate 3D Render on Gemini Web</span>
+                    </div>
+                    <p class="text-xs text-slate-200 font-sans max-w-md leading-relaxed">
+                        Click the big button below to automatically copy your room design prompt and open <strong>gemini.google.com</strong> in a new tab!
+                    </p>
+                    <button onclick="copyAndLaunchGemini()" class="w-full py-4 bg-gradient-to-r from-amber-400 via-pink-500 to-indigo-500 hover:from-amber-300 hover:to-indigo-400 text-slate-950 font-black text-lg rounded-2xl shadow-xl hover:shadow-2xl transition transform active:scale-95 flex items-center justify-center gap-3 border-2 border-white/80">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-xl"></i>
+                        <span>Copy Prompt & Open Gemini.google.com</span>
                     </button>
                 </div>
 
-                <!-- Generated Prompt Card -->
+                <!-- Generated Prompt Display -->
                 <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-3.5 text-left flex flex-col gap-2">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-500 font-sans flex items-center gap-1.5">
-                            <i class="fa-solid fa-terminal text-indigo-600"></i> Auto-Generated AI Prompt:
+                            <i class="fa-solid fa-terminal text-indigo-600"></i> Generated Room Prompt:
                         </span>
                         <button onclick="copyGeneratedPrompt()" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 font-sans bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg border border-indigo-200 transition">
                             <i class="fa-regular fa-copy"></i>
                             <span id="copy-btn-text">Copy Prompt</span>
                         </button>
                     </div>
-                    <textarea id="ai-prompt-box" readonly class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-sm text-slate-700 font-mono resize-none focus:outline-none" rows="3"></textarea>
+                    <textarea id="ai-prompt-box" readonly class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs text-slate-700 font-mono resize-none focus:outline-none" rows="2"></textarea>
                 </div>
 
-                <!-- Primary Action: Open Direct in Gemini.google.com -->
-                <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-4 flex flex-col items-center gap-3">
-                    <div class="flex items-center gap-2 text-indigo-900 font-bold text-base">
-                        <i class="fa-solid fa-arrow-up-right-from-square text-indigo-600 text-lg"></i>
-                        <span>Method 1: Direct Gemini Launch (100% Guaranteed)</span>
-                    </div>
-                    <p class="text-xs text-indigo-700 font-sans max-w-md">
-                        Clicking below will automatically copy your design prompt and open <strong>Gemini</strong> in a new tab where you can paste and generate 3D renders instantly!
-                    </p>
-                    <button onclick="copyAndLaunchGemini()" class="w-full py-3.5 bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold text-base rounded-2xl shadow-lg hover:shadow-xl transition transform active:scale-98 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-rocket text-amber-300 text-lg"></i>
-                        <span>Copy Prompt & Open Gemini.google.com</span>
-                    </button>
-                </div>
-
-                <!-- Secondary Option: In-App Instant Render -->
+                <!-- Secondary Option: In-App Graphic Summary -->
                 <div class="flex items-center justify-between border-t border-slate-100 pt-3">
-                    <span class="text-xs font-bold text-slate-500 font-sans">Method 2: In-App Canvas Preview</span>
+                    <span class="text-xs font-bold text-slate-500 font-sans">Quick In-App Graphic Preview</span>
                     <button onclick="generateInAppAIRender()" class="px-4 py-2 bg-slate-100 hover:bg-indigo-100 text-slate-700 hover:text-indigo-700 font-bold rounded-xl text-xs transition border border-slate-200 flex items-center gap-1.5">
                         <i class="fa-solid fa-image"></i>
-                        <span>Generate Inside App</span>
+                        <span>Show Student Blueprint</span>
                     </button>
                 </div>
 
-                <!-- In-App Preview Container -->
                 <div id="inapp-preview-container" class="hidden flex flex-col gap-2">
-                    <div id="ai-loading-state" class="py-6 flex flex-col items-center justify-center gap-3">
-                        <i class="fa-solid fa-circle-notch animate-spin text-indigo-600 text-3xl"></i>
-                        <span class="text-sm font-bold text-slate-700">Rendering room graphic...</span>
-                    </div>
-                    <div id="ai-result-state" class="hidden w-full aspect-video rounded-2xl overflow-hidden border-2 border-slate-200 shadow-inner bg-slate-900 relative">
+                    <div id="ai-result-state" class="w-full aspect-video rounded-2xl overflow-hidden border-2 border-slate-200 shadow-inner bg-slate-900 relative">
                         <img id="ai-generated-img" src="" alt="AI Generated Room" class="w-full h-full object-cover">
                     </div>
                 </div>
@@ -317,7 +276,6 @@
     <!-- ROOM RATING / SCORE EVALUATION MODAL -->
     <div id="modal-rating" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-lg w-full p-6 text-center shadow-2xl animate-pop border-2 border-indigo-100 relative max-h-[90vh] overflow-y-auto">
-            
             <button onclick="closeModal('modal-rating')" class="absolute top-4 right-4 w-9 h-9 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full flex items-center justify-center text-lg transition">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -327,18 +285,10 @@
             </div>
 
             <h3 id="modal-room-title" class="text-2xl font-bold text-slate-800 mb-1">Room Evaluation</h3>
+            <div id="modal-stars-container" class="flex justify-center gap-2 text-3xl my-3"></div>
+            <p id="modal-feedback-msg" class="text-sm font-bold text-slate-600 mb-4 font-sans">Awesome design!</p>
 
-            <div id="modal-stars-container" class="flex justify-center gap-2 text-3xl my-3">
-                <!-- Stars injected here -->
-            </div>
-
-            <p id="modal-feedback-msg" class="text-sm font-bold text-slate-600 mb-4 font-sans">
-                Awesome design!
-            </p>
-
-            <div id="modal-placed-list" class="flex flex-wrap justify-center gap-2 mb-6 max-h-40 overflow-y-auto p-2 bg-slate-50 rounded-2xl border border-slate-200">
-                <!-- Items list injected here -->
-            </div>
+            <div id="modal-placed-list" class="flex flex-wrap justify-center gap-2 mb-6 max-h-40 overflow-y-auto p-2 bg-slate-50 rounded-2xl border border-slate-200"></div>
 
             <div class="flex gap-3">
                 <button onclick="nextRoomFromModal()" class="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl transition shadow-md flex items-center justify-center gap-2">
@@ -349,7 +299,6 @@
                     Close
                 </button>
             </div>
-
         </div>
     </div>
 
@@ -381,77 +330,23 @@
     </div>
 
     <script>
-        /* ==========================================================================
-           DATA STRUCTURES & ROOM CONFIGURATIONS
-           ========================================================================== */
         const ROOMS = [
-            {
-                id: 'bedroom',
-                name: 'Bedroom',
-                icon: 'fa-bed',
-                themeClass: 'theme-bedroom',
-                speechPhrase: 'This is the bedroom! Add beds, lamps, and wardrobes here.',
-                targetItemIds: ['bed', 'wardrobe', 'pillow', 'alarm_clock', 'lamp', 'bunk_bed', 'desk', 'desk_chair', 'dresser', 'nightstand', 'crib', 'teddy_bear']
-            },
-            {
-                id: 'living_room',
-                name: 'Living Room',
-                icon: 'fa-couch',
-                themeClass: 'theme-living_room',
-                speechPhrase: 'This is the living room! Add sofas, TVs, and bookshelves here.',
-                targetItemIds: ['sofa', 'tv', 'coffee_table', 'bookshelf', 'fireplace', 'armchair', 'carpet', 'curtain', 'painting', 'wall_clock', 'aquarium', 'guitar', 'floor_lamp']
-            },
-            {
-                id: 'kitchen',
-                name: 'Kitchen',
-                icon: 'fa-fire-burner',
-                themeClass: 'theme-kitchen',
-                speechPhrase: 'This is the kitchen! Add stoves, fridges, and sinks here.',
-                targetItemIds: ['refrigerator', 'stove', 'microwave', 'sink', 'blender', 'toaster', 'oven', 'coffee_maker', 'kettle', 'dishwasher']
-            },
-            {
-                id: 'dining_room',
-                name: 'Dining Room',
-                icon: 'fa-utensils',
-                themeClass: 'theme-dining_room',
-                speechPhrase: 'This is the dining room! Add tables, chairs, and teapots here.',
-                targetItemIds: ['dining_table', 'dining_chair', 'chandelier', 'teapot', 'fruit_bowl', 'vase']
-            },
-            {
-                id: 'bathroom',
-                name: 'Bathroom',
-                icon: 'fa-bath',
-                themeClass: 'theme-bathroom',
-                speechPhrase: 'This is the bathroom! Add bathtubs, toilets, and towels here.',
-                targetItemIds: ['bathtub', 'toilet', 'shower', 'mirror', 'towel', 'washbasin', 'soap', 'toothbrush', 'toilet_paper', 'bath_mat', 'medicine_cabinet', 'laundry_basket']
-            },
-            {
-                id: 'garden',
-                name: 'Garden',
-                icon: 'fa-tree',
-                themeClass: 'theme-garden',
-                speechPhrase: 'This is the garden! Add flower pots, benches, and trees here.',
-                targetItemIds: ['flower_pot', 'bench', 'fountain', 'watering_can', 'apple_tree', 'bbq_grill', 'swing', 'lawn_mower', 'birdhouse', 'bicycle', 'picnic_table', 'garden_hose', 'sunflower']
-            },
-            {
-                id: 'swimming_pool',
-                name: 'Swimming Pool',
-                icon: 'fa-person-swimming',
-                themeClass: 'theme-swimming_pool',
-                speechPhrase: 'This is the swimming pool! Add loungers, floats, and umbrellas here.',
-                targetItemIds: ['sun_lounger', 'pool_float', 'lifebuoy', 'umbrella', 'goggles', 'pool_ladder', 'beach_ball', 'palm_tree', 'towel']
-            }
+            { id: 'bedroom', name: 'Bedroom', icon: 'fa-bed', themeClass: 'theme-bedroom', speechPhrase: 'This is the bedroom! Add beds, lamps, and wardrobes here.', targetItemIds: ['bed', 'wardrobe', 'pillow', 'alarm_clock', 'lamp', 'bunk_bed', 'desk', 'desk_chair', 'dresser', 'nightstand', 'crib', 'teddy_bear'] },
+            { id: 'living_room', name: 'Living Room', icon: 'fa-couch', themeClass: 'theme-living_room', speechPhrase: 'This is the living room! Add sofas, TVs, and bookshelves here.', targetItemIds: ['sofa', 'tv', 'coffee_table', 'bookshelf', 'fireplace', 'armchair', 'carpet', 'curtain', 'painting', 'wall_clock', 'aquarium', 'guitar', 'floor_lamp'] },
+            { id: 'kitchen', name: 'Kitchen', icon: 'fa-fire-burner', themeClass: 'theme-kitchen', speechPhrase: 'This is the kitchen! Add stoves, fridges, and sinks here.', targetItemIds: ['refrigerator', 'stove', 'microwave', 'sink', 'blender', 'toaster', 'oven', 'coffee_maker', 'kettle', 'dishwasher'] },
+            { id: 'dining_room', name: 'Dining Room', icon: 'fa-utensils', themeClass: 'theme-dining_room', speechPhrase: 'This is the dining room! Add tables, chairs, and teapots here.', targetItemIds: ['dining_table', 'dining_chair', 'chandelier', 'teapot', 'fruit_bowl', 'vase'] },
+            { id: 'bathroom', name: 'Bathroom', icon: 'fa-bath', themeClass: 'theme-bathroom', speechPhrase: 'This is the bathroom! Add bathtubs, toilets, and towels here.', targetItemIds: ['bathtub', 'toilet', 'shower', 'mirror', 'towel', 'washbasin', 'soap', 'toothbrush', 'toilet_paper', 'bath_mat', 'medicine_cabinet', 'laundry_basket'] },
+            { id: 'garden', name: 'Garden', icon: 'fa-tree', themeClass: 'theme-garden', speechPhrase: 'This is the garden! Add flower pots, benches, and trees here.', targetItemIds: ['flower_pot', 'bench', 'fountain', 'watering_can', 'apple_tree', 'bbq_grill', 'swing', 'lawn_mower', 'birdhouse', 'bicycle', 'picnic_table', 'garden_hose', 'sunflower'] },
+            { id: 'swimming_pool', name: 'Swimming Pool', icon: 'fa-person-swimming', themeClass: 'theme-swimming_pool', speechPhrase: 'This is the swimming pool! Add loungers, floats, and umbrellas here.', targetItemIds: ['sun_lounger', 'pool_float', 'lifebuoy', 'umbrella', 'goggles', 'pool_ladder', 'beach_ball', 'palm_tree', 'towel'] }
         ];
 
-        /* EXPANDED ITEMS DATABASE */
         const ALL_ITEMS = [
-            // Furniture
             { id: 'bed', name: 'Bed', icon: '🛏️', cat: 'furniture' },
             { id: 'bunk_bed', name: 'Bunk Bed', icon: '🛌', cat: 'furniture' },
             { id: 'sofa', name: 'Sofa', icon: '🛋️', cat: 'furniture' },
             { id: 'armchair', name: 'Armchair', icon: '🦼', cat: 'furniture' },
             { id: 'wardrobe', name: 'Wardrobe', icon: '🚪', cat: 'furniture' },
-            { id: 'dresser', name: 'Dresser', icon: '🗄️', cat: 'furniture' },
+            { id: 'dresser', name: 'Dresser', icon: '🗄️️', cat: 'furniture' },
             { id: 'nightstand', name: 'Nightstand', icon: '🕯️', cat: 'furniture' },
             { id: 'desk', name: 'Study Desk', icon: '🖥️', cat: 'furniture' },
             { id: 'desk_chair', name: 'Desk Chair', icon: '💺', cat: 'furniture' },
@@ -460,9 +355,7 @@
             { id: 'coffee_table', name: 'Coffee Table', icon: '☕', cat: 'furniture' },
             { id: 'bookshelf', name: 'Bookshelf', icon: '📚', cat: 'furniture' },
             { id: 'crib', name: 'Baby Crib', icon: '👶', cat: 'furniture' },
-            { id: 'shoe_rack', name: 'Shoe Rack', icon: '👟', cat: 'furniture' },
-
-            // Appliances
+            
             { id: 'tv', name: 'Television', icon: '📺', cat: 'appliances' },
             { id: 'refrigerator', name: 'Refrigerator', icon: '🧊', cat: 'appliances' },
             { id: 'stove', name: 'Stove', icon: '🍳', cat: 'appliances' },
@@ -473,28 +366,14 @@
             { id: 'coffee_maker', name: 'Coffee Maker', icon: '☕', cat: 'appliances' },
             { id: 'kettle', name: 'Kettle', icon: '🫖', cat: 'appliances' },
             { id: 'dishwasher', name: 'Dishwasher', icon: '🍽', cat: 'appliances' },
-            { id: 'washing_machine', name: 'Washing Machine', icon: '🧺', cat: 'appliances' },
-            { id: 'fan', name: 'Electric Fan', icon: '🪭', cat: 'appliances' },
-            { id: 'air_conditioner', name: 'Air Conditioner', icon: '❄️', cat: 'appliances' },
-            { id: 'vacuum', name: 'Vacuum Cleaner', icon: '🧹', cat: 'appliances' },
-            { id: 'computer', name: 'Computer', icon: '💻', cat: 'appliances' },
-            { id: 'alarm_clock', name: 'Alarm Clock', icon: '⏰', cat: 'appliances' },
 
-            // Fixtures & Bathroom
             { id: 'bathtub', name: 'Bathtub', icon: '🛁', cat: 'fixtures' },
             { id: 'toilet', name: 'Toilet', icon: '🚽', cat: 'fixtures' },
             { id: 'shower', name: 'Shower', icon: '🚿', cat: 'fixtures' },
             { id: 'sink', name: 'Kitchen Sink', icon: '🚰', cat: 'fixtures' },
             { id: 'washbasin', name: 'Washbasin', icon: '🧼', cat: 'fixtures' },
             { id: 'mirror', name: 'Mirror', icon: '🪞', cat: 'fixtures' },
-            { id: 'soap', name: 'Soap', icon: '🧴', cat: 'fixtures' },
-            { id: 'toothbrush', name: 'Toothbrush', icon: '🪥', cat: 'fixtures' },
-            { id: 'toilet_paper', name: 'Toilet Paper', icon: '🧻', cat: 'fixtures' },
-            { id: 'bath_mat', name: 'Bath Mat', icon: '🟫', cat: 'fixtures' },
-            { id: 'laundry_basket', name: 'Laundry Basket', icon: '🧺', cat: 'fixtures' },
-            { id: 'medicine_cabinet', name: 'Medicine Cabinet', icon: '💊', cat: 'fixtures' },
 
-            // Decor & Misc
             { id: 'lamp', name: 'Night Lamp', icon: '💡', cat: 'decor' },
             { id: 'floor_lamp', name: 'Floor Lamp', icon: '🏮', cat: 'decor' },
             { id: 'pillow', name: 'Pillow', icon: '🛌', cat: 'decor' },
@@ -503,42 +382,14 @@
             { id: 'carpet', name: 'Carpet', icon: '🧶', cat: 'decor' },
             { id: 'curtain', name: 'Curtains', icon: '🪟', cat: 'decor' },
             { id: 'painting', name: 'Wall Painting', icon: '🖼', cat: 'decor' },
-            { id: 'wall_clock', name: 'Wall Clock', icon: '🕒', cat: 'decor' },
-            { id: 'vase', name: 'Flower Vase', icon: '🏺', cat: 'decor' },
-            { id: 'teapot', name: 'Teapot', icon: '🫖', cat: 'decor' },
-            { id: 'fruit_bowl', name: 'Fruit Bowl', icon: '🍎', cat: 'decor' },
-            { id: 'towel', name: 'Towel', icon: '🧴', cat: 'decor' },
-            { id: 'teddy_bear', name: 'Teddy Bear', icon: '🧸', cat: 'decor' },
-            { id: 'guitar', name: 'Guitar', icon: '🎸', cat: 'decor' },
-            { id: 'aquarium', name: 'Fish Tank', icon: '🐠', cat: 'decor' },
 
-            // Outdoor & Garden
             { id: 'flower_pot', name: 'Flower Pot', icon: '🪴', cat: 'outdoor' },
             { id: 'bench', name: 'Garden Bench', icon: '🪑', cat: 'outdoor' },
             { id: 'fountain', name: 'Fountain', icon: '⛲', cat: 'outdoor' },
-            { id: 'watering_can', name: 'Watering Can', icon: '🪣', cat: 'outdoor' },
             { id: 'apple_tree', name: 'Apple Tree', icon: '🌳', cat: 'outdoor' },
-            { id: 'sunflower', name: 'Sunflower', icon: '🌻', cat: 'outdoor' },
-            { id: 'palm_tree', name: 'Palm Tree', icon: '🌴', cat: 'outdoor' },
-            { id: 'bbq_grill', name: 'BBQ Grill', icon: '🍖', cat: 'outdoor' },
-            { id: 'swing', name: 'Garden Swing', icon: '🎪', cat: 'outdoor' },
-            { id: 'lawn_mower', name: 'Lawn Mower', icon: '🚜', cat: 'outdoor' },
-            { id: 'birdhouse', name: 'Birdhouse', icon: '🐤', cat: 'outdoor' },
-            { id: 'bicycle', name: 'Bicycle', icon: '🚲', cat: 'outdoor' },
-            { id: 'picnic_table', name: 'Picnic Table', icon: '🧺', cat: 'outdoor' },
-            { id: 'garden_hose', name: 'Garden Hose', icon: '🚰', cat: 'outdoor' },
-            { id: 'sun_lounger', name: 'Sun Lounger', icon: '🏖️', cat: 'outdoor' },
-            { id: 'pool_float', name: 'Flamingo Float', icon: '🦩', cat: 'outdoor' },
-            { id: 'lifebuoy', name: 'Lifebuoy', icon: '🛟', cat: 'outdoor' },
-            { id: 'umbrella', name: 'Beach Umbrella', icon: '⛱', cat: 'outdoor' },
-            { id: 'goggles', name: 'Goggles', icon: '🥽', cat: 'outdoor' },
-            { id: 'pool_ladder', name: 'Pool Ladder', icon: '🪜', cat: 'outdoor' },
-            { id: 'beach_ball', name: 'Beach Ball', icon: '🏐', cat: 'outdoor' }
+            { id: 'sunflower', name: 'Sunflower', icon: '🌻', cat: 'outdoor' }
         ];
 
-        /* ==========================================================================
-           AUDIO & TEXT-TO-SPEECH ENGINE
-           ========================================================================== */
         let audioEnabled = true;
         let audioCtx = null;
 
@@ -583,7 +434,6 @@
             try {
                 const ctx = getAudioContext();
                 if (!ctx) return;
-
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.connect(gain);
@@ -623,9 +473,6 @@
             } catch(e) { console.log(e); }
         }
 
-        /* ==========================================================================
-           GAME STATE & INITIALIZATION
-           ========================================================================== */
         let gameState = {
             currentRoomIndex: 0,
             activeCategory: 'furniture',
@@ -636,25 +483,12 @@
 
         window.onload = function() {
             ROOMS.forEach(r => {
-                gameState.roomData[r.id] = {
-                    placedItems: [],
-                    stars: 0
-                };
+                gameState.roomData[r.id] = { placedItems: [], stars: 0 };
             });
             renderRoomNavPills();
             loadRoom(0);
-
-            // Unlock Web Audio / Speech API on initial user interaction
-            const unlockAudio = () => {
-                getAudioContext();
-                document.removeEventListener('click', unlockAudio);
-                document.removeEventListener('touchstart', unlockAudio);
-            };
-            document.addEventListener('click', unlockAudio);
-            document.addEventListener('touchstart', unlockAudio);
         };
 
-        /* ROOM NAVIGATION & SELECTION FUNCTIONS */
         function renderRoomNavPills() {
             const container = document.getElementById('room-nav-pills');
             if (!container) return;
@@ -665,22 +499,13 @@
                 const pill = document.createElement('button');
                 pill.onclick = () => loadRoom(idx);
                 pill.className = `px-3.5 py-1.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition shrink-0 border ${
-                    isActive 
-                        ? 'bg-indigo-600 text-white border-indigo-400 shadow-md' 
-                        : 'bg-slate-700/60 text-slate-300 hover:bg-slate-700 border-slate-600'
+                    isActive ? 'bg-indigo-600 text-white border-indigo-400 shadow-md' : 'bg-slate-700/60 text-slate-300 hover:bg-slate-700 border-slate-600'
                 }`;
 
                 const stars = gameState.roomData[r.id] ? gameState.roomData[r.id].stars : 0;
-                let starIcon = '';
-                if (stars > 0) {
-                    starIcon = `<span class="text-amber-400 text-xs"><i class="fa-solid fa-star"></i>${stars}</span>`;
-                }
+                let starIcon = stars > 0 ? `<span class="text-amber-400 text-xs"><i class="fa-solid fa-star"></i>${stars}</span>` : '';
 
-                pill.innerHTML = `
-                    <i class="fa-solid ${r.icon}"></i>
-                    <span>${r.name}</span>
-                    ${starIcon}
-                `;
+                pill.innerHTML = `<i class="fa-solid ${r.icon}"></i><span>${r.name}</span>${starIcon}`;
                 container.appendChild(pill);
             });
         }
@@ -688,27 +513,12 @@
         function loadRoom(index) {
             if (index < 0 || index >= ROOMS.length) return;
             gameState.currentRoomIndex = index;
-
             const room = ROOMS[index];
 
-            // Update Header Information
-            const titleElem = document.getElementById('room-title-heading');
-            if (titleElem) titleElem.innerText = room.name;
-
-            const iconElem = document.getElementById('active-room-icon-class');
-            if (iconElem) iconElem.className = `fa-solid ${room.icon}`;
-
-            // Update Room Canvas Background Theme Class
-            const canvas = document.getElementById('room-canvas');
-            if (canvas) {
-                canvas.className = `w-full flex-1 rounded-3xl border-4 border-dashed border-white/80 relative transition-all duration-300 shadow-2xl ${room.themeClass} overflow-hidden flex flex-col justify-end p-4 min-h-0`;
-            }
-
-            // Update Feedback Bar
-            const feedback = document.getElementById('feedback-text');
-            if (feedback) {
-                feedback.innerHTML = `Welcome to the <strong>${room.name}</strong>! Drag items to decorate.`;
-            }
+            document.getElementById('room-title-heading').innerText = room.name;
+            document.getElementById('active-room-icon-class').className = `fa-solid ${room.icon}`;
+            document.getElementById('room-canvas').className = `w-full flex-1 rounded-3xl border-4 border-dashed border-white/80 relative transition-all duration-300 shadow-2xl ${room.themeClass} overflow-hidden flex flex-col justify-end p-4 min-h-0`;
+            document.getElementById('feedback-text').innerHTML = `Welcome to the <strong>${room.name}</strong>! Drag items to decorate.`;
 
             renderRoomNavPills();
             renderCanvasItems();
@@ -718,48 +528,13 @@
 
         function filterCategory(category) {
             gameState.activeCategory = category;
-
             ['furniture', 'appliances', 'fixtures', 'decor', 'outdoor'].forEach(cat => {
                 const btn = document.getElementById(`cat-${cat}`);
-                if (btn) {
-                    if (cat === category) {
-                        btn.className = "py-2 rounded-xl transition flex flex-col items-center gap-1 bg-white text-indigo-600 shadow-sm border border-slate-200 font-bold";
-                    } else {
-                        btn.className = "py-2 rounded-xl transition flex flex-col items-center gap-1 text-slate-600 hover:text-slate-900 font-bold";
-                    }
-                }
+                if (btn) btn.className = (cat === category) 
+                    ? "py-2 rounded-xl transition flex flex-col items-center gap-1 bg-white text-indigo-600 shadow-sm border border-slate-200 font-bold"
+                    : "py-2 rounded-xl transition flex flex-col items-center gap-1 text-slate-600 hover:text-slate-900 font-bold";
             });
-
             renderCatalog();
-        }
-
-        /* API KEY MANAGEMENT FOR EXTERNAL HOSTING */
-        function getStoredApiKey() {
-            return localStorage.getItem('gemini_api_key') || "";
-        }
-
-        function openApiKeyModal() {
-            const input = document.getElementById('api-key-input');
-            if (input) input.value = getStoredApiKey();
-            const modal = document.getElementById('modal-api-key');
-            if (modal) modal.classList.remove('hidden');
-        }
-
-        function saveApiKey() {
-            const input = document.getElementById('api-key-input');
-            if (input) {
-                localStorage.setItem('gemini_api_key', input.value.trim());
-                speakText("API key saved");
-            }
-            closeModal('modal-api-key');
-        }
-
-        function clearApiKey() {
-            localStorage.removeItem('gemini_api_key');
-            const input = document.getElementById('api-key-input');
-            if (input) input.value = '';
-            speakText("API key cleared");
-            closeModal('modal-api-key');
         }
 
         function renderCatalog() {
@@ -768,7 +543,6 @@
             grid.innerHTML = '';
 
             const items = ALL_ITEMS.filter(item => item.cat === gameState.activeCategory);
-
             items.forEach(item => {
                 const card = document.createElement('div');
                 card.draggable = true;
@@ -778,84 +552,31 @@
                     <span class="text-xs sm:text-sm font-bold text-slate-800 leading-tight pointer-events-none select-none">${item.name}</span>
                 `;
 
-                // Desktop Mouse Drag
                 card.ondragstart = (e) => {
                     draggedCatalogItemId = item.id;
                     e.dataTransfer.setData('text/plain', item.id);
                     speakText(item.name);
                 };
 
-                // Smart Board & Touch Screen Drag & Tap Support
-                let touchStartX = 0, touchStartY = 0;
-                card.ontouchstart = (e) => {
-                    touchStartX = e.touches[0].clientX;
-                    touchStartY = e.touches[0].clientY;
-                    draggedCatalogItemId = item.id;
-                };
-
-                card.ontouchend = (e) => {
-                    const touchEndX = e.changedTouches[0].clientX;
-                    const touchEndY = e.changedTouches[0].clientY;
-                    const canvas = document.getElementById('room-canvas');
-
-                    if (canvas) {
-                        const rect = canvas.getBoundingClientRect();
-                        if (touchEndX >= rect.left && touchEndX <= rect.right && touchEndY >= rect.top && touchEndY <= rect.bottom) {
-                            let x = ((touchEndX - rect.left) / rect.width) * 100;
-                            let y = ((touchEndY - rect.top) / rect.height) * 100;
-                            x = Math.max(8, Math.min(85, x));
-                            y = Math.max(12, Math.min(80, y));
-                            addItemToCanvas(item.id, x, y);
-                            return;
-                        }
-                    }
-
-                    if (Math.abs(touchEndX - touchStartX) < 10 && Math.abs(touchEndY - touchStartY) < 10) {
-                        addItemToCanvas(item.id);
-                    }
-                };
-
-                card.onclick = () => {
-                    addItemToCanvas(item.id);
-                };
-
+                card.onclick = () => addItemToCanvas(item.id);
                 grid.appendChild(card);
             });
         }
 
-        /* ==========================================================================
-           DRAG & DROP CANVAS LOGIC
-           ========================================================================== */
-        function handleDragOver(e) {
-            e.preventDefault();
-            const canvas = document.getElementById('room-canvas');
-            if (canvas) canvas.classList.add('drop-highlight');
-        }
-
-        function handleDragLeave(e) {
-            const canvas = document.getElementById('room-canvas');
-            if (canvas) canvas.classList.remove('drop-highlight');
-        }
+        function handleDragOver(e) { e.preventDefault(); }
+        function handleDragLeave(e) {}
 
         function handleDrop(e) {
             e.preventDefault();
-            const canvas = document.getElementById('room-canvas');
-            if (canvas) canvas.classList.remove('drop-highlight');
-
             const itemId = e.dataTransfer.getData('text/plain') || draggedCatalogItemId;
             if (!itemId) return;
 
+            const canvas = document.getElementById('room-canvas');
             if (canvas) {
                 const rect = canvas.getBoundingClientRect();
-                let x = ((e.clientX - rect.left) / rect.width) * 100;
-                let y = ((e.clientY - rect.top) / rect.height) * 100;
-
-                x = Math.max(8, Math.min(85, x));
-                y = Math.max(12, Math.min(80, y));
-
+                let x = Math.max(8, Math.min(85, ((e.clientX - rect.left) / rect.width) * 100));
+                let y = Math.max(12, Math.min(80, ((e.clientY - rect.top) / rect.height) * 100));
                 addItemToCanvas(itemId, x, y);
-            } else {
-                addItemToCanvas(itemId);
             }
             draggedCatalogItemId = null;
         }
@@ -874,20 +595,11 @@
             }
 
             const uid = 'item_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
-            roomProg.placedItems.push({
-                uid: uid,
-                id: itemId,
-                x: posX,
-                y: posY
-            });
+            roomProg.placedItems.push({ uid: uid, id: itemId, x: posX, y: posY });
 
             playSoundFx('place');
             speakText(itemObj.name);
-
-            const feedback = document.getElementById('feedback-text');
-            if (feedback) {
-                feedback.innerHTML = `Placed <strong>${itemObj.name}</strong> in the <strong>${room.name}</strong>!`;
-            }
+            document.getElementById('feedback-text').innerHTML = `Placed <strong>${itemObj.name}</strong> in the <strong>${room.name}</strong>!`;
 
             renderCanvasItems();
         }
@@ -912,7 +624,7 @@
                 elem.innerHTML = `
                     <span class="text-5xl sm:text-6xl pointer-events-none select-none">${itemObj.icon}</span>
                     <span class="text-xs font-bold text-slate-800 pointer-events-none select-none leading-none mt-1 bg-slate-100/80 px-2 py-0.5 rounded-md border border-slate-200">${itemObj.name}</span>
-                    <button onclick="removeItem('${placed.uid}', event)" class="absolute -top-3 -right-3 w-7 h-7 bg-rose-500 hover:bg-rose-600 text-white rounded-full text-xs flex items-center justify-center transition shadow-lg border-2 border-white transform hover:scale-110" title="Remove">
+                    <button onclick="removeItem('${placed.uid}', event)" class="absolute -top-3 -right-3 w-7 h-7 bg-rose-500 hover:bg-rose-600 text-white rounded-full text-xs flex items-center justify-center transition shadow-lg border-2 border-white transform hover:scale-110">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 `;
@@ -932,20 +644,12 @@
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-                startX = clientX;
-                startY = clientY;
-
+                startX = clientX; startY = clientY;
                 const canvas = document.getElementById('room-canvas');
                 if (!canvas) return;
                 const rect = canvas.getBoundingClientRect();
                 initialLeft = (placedObj.x / 100) * rect.width;
                 initialTop = (placedObj.y / 100) * rect.height;
-
-                const itemObj = ALL_ITEMS.find(i => i.id === placedObj.id);
-                if (itemObj) {
-                    playSoundFx('pop');
-                    speakText(itemObj.name);
-                }
 
                 document.addEventListener('mousemove', onMove);
                 document.addEventListener('mouseup', onEnd);
@@ -956,27 +660,18 @@
             const onMove = (e) => {
                 if (!isDragging) return;
                 if (e.cancelable) e.preventDefault();
-
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-                const dx = clientX - startX;
-                const dy = clientY - startY;
 
                 const canvas = document.getElementById('room-canvas');
                 if (!canvas) return;
                 const rect = canvas.getBoundingClientRect();
 
-                let newX = ((initialLeft + dx) / rect.width) * 100;
-                let newY = ((initialTop + dy) / rect.height) * 100;
+                let newX = Math.max(2, Math.min(85, ((initialLeft + (clientX - startX)) / rect.width) * 100));
+                let newY = Math.max(5, Math.min(82, ((initialTop + (clientY - startY)) / rect.height) * 100));
 
-                newX = Math.max(2, Math.min(85, newX));
-                newY = Math.max(5, Math.min(82, newY));
-
-                placedObj.x = newX;
-                placedObj.y = newY;
-                elem.style.left = newX + '%';
-                elem.style.top = newY + '%';
+                placedObj.x = newX; placedObj.y = newY;
+                elem.style.left = newX + '%'; elem.style.top = newY + '%';
             };
 
             const onEnd = () => {
@@ -1012,16 +707,14 @@
             speakText(room.name);
         }
 
-        /* ==========================================================================
-           GEMINI DIRECT LAUNCH & AUTOMATIC PROMPT ROUTING LOGIC
-           ========================================================================== */
+        /* GEMINI DIRECT ROUTING AND PROMPT LOGIC */
         function getGeneratedPromptText() {
             const room = ROOMS[gameState.currentRoomIndex];
             const roomProg = gameState.roomData[room.id];
             const placed = roomProg ? roomProg.placedItems : [];
 
             if (!placed || placed.length === 0) {
-                return `Create a vibrant, high-quality 3D Pixar-style digital illustration of a colorful ${room.name} in a modern cozy home.`;
+                return `Create a colorful, high quality 3D Pixar style digital render of a cozy ${room.name}.`;
             }
 
             const itemNames = Array.from(new Set(placed.map(p => {
@@ -1029,7 +722,7 @@
                 return itemObj ? itemObj.name : null;
             }).filter(Boolean)));
 
-            return `Create a beautiful 3D Pixar-style interior render of a colorful ${room.name} containing: ${itemNames.join(', ')}. Bright lighting, cute aesthetic, 4k resolution, classroom friendly.`;
+            return `Create a beautiful 3D Pixar-style interior render of a colorful ${room.name} containing: ${itemNames.join(', ')}. Bright friendly lighting, cute cartoon style, high quality, 4k resolution.`;
         }
 
         function openAIRoomModal() {
@@ -1039,48 +732,30 @@
 
             if (!placed || placed.length === 0) {
                 speakText("Please place some items in the room first!");
-                const feedback = document.getElementById('feedback-text');
-                if (feedback) {
-                    feedback.innerHTML = `⚠️ Place items in the <strong>${room.name}</strong> before generating an AI prompt!`;
-                }
+                document.getElementById('feedback-text').innerHTML = `⚠️ Place items in the <strong>${room.name}</strong> before generating an AI prompt!`;
                 return;
             }
 
-            const promptBox = document.getElementById('ai-prompt-box');
-            if (promptBox) {
-                promptBox.value = getGeneratedPromptText();
-            }
+            document.getElementById('ai-prompt-box').value = getGeneratedPromptText();
+            document.getElementById('ai-room-title').innerText = `${room.name} Visualizer`;
+            document.getElementById('copy-btn-text').innerText = "Copy Prompt";
+            document.getElementById('inapp-preview-container').classList.add('hidden');
+            document.getElementById('modal-ai-preview').classList.remove('hidden');
 
-            const aiTitle = document.getElementById('ai-room-title');
-            if (aiTitle) aiTitle.innerText = `${room.name} Visualizer`;
-
-            const btnText = document.getElementById('copy-btn-text');
-            if (btnText) btnText.innerText = "Copy Prompt";
-
-            const container = document.getElementById('inapp-preview-container');
-            if (container) container.classList.add('hidden');
-
-            const modal = document.getElementById('modal-ai-preview');
-            if (modal) modal.classList.remove('hidden');
-
-            speakText(`AI Visualizer ready for ${room.name}!`);
+            speakText(`AI Visualizer ready for ${room.name}! Click the button to launch Gemini.`);
         }
 
         async function copyGeneratedPrompt() {
             const promptText = getGeneratedPromptText();
             try {
                 await navigator.clipboard.writeText(promptText);
-                const btnText = document.getElementById('copy-btn-text');
-                if (btnText) btnText.innerText = "Copied! ✓";
+                document.getElementById('copy-btn-text').innerText = "Copied! ✓";
                 speakText("Prompt copied!");
             } catch(err) {
                 const promptBox = document.getElementById('ai-prompt-box');
-                if (promptBox) {
-                    promptBox.select();
-                    document.execCommand('copy');
-                    const btnText = document.getElementById('copy-btn-text');
-                    if (btnText) btnText.innerText = "Copied! ✓";
-                }
+                promptBox.select();
+                document.execCommand('copy');
+                document.getElementById('copy-btn-text').innerText = "Copied! ✓";
             }
         }
 
@@ -1091,43 +766,27 @@
             window.open('https://gemini.google.com/', '_blank');
         }
 
-        /* IN-APP PROCEDURAL CANVAS FALLBACK GENERATOR */
         function generateInAppAIRender() {
             const room = ROOMS[gameState.currentRoomIndex];
             const roomProg = gameState.roomData[room.id];
             const placed = roomProg ? roomProg.placedItems : [];
 
-            const container = document.getElementById('inapp-preview-container');
-            const loadingState = document.getElementById('ai-loading-state');
-            const resultState = document.getElementById('ai-result-state');
-            const imgElem = document.getElementById('ai-generated-img');
+            const itemNames = Array.from(new Set(placed.map(p => {
+                const itemObj = ALL_ITEMS.find(i => i.id === p.id);
+                return itemObj ? itemObj.name : null;
+            }).filter(Boolean)));
 
-            if (container) container.classList.remove('hidden');
-            if (loadingState) loadingState.classList.remove('hidden');
-            if (resultState) resultState.classList.add('hidden');
-
-            setTimeout(() => {
-                const itemNames = Array.from(new Set(placed.map(p => {
-                    const itemObj = ALL_ITEMS.find(i => i.id === p.id);
-                    return itemObj ? itemObj.name : null;
-                }).filter(Boolean)));
-
-                const canvasUrl = generateCanvasRoomFallback(room.name, itemNames);
-                if (imgElem) imgElem.src = canvasUrl;
-
-                if (loadingState) loadingState.classList.add('hidden');
-                if (resultState) resultState.classList.remove('hidden');
-                playSoundFx('fanfare');
-            }, 500);
+            const canvasUrl = generateCanvasRoomFallback(room.name, itemNames);
+            document.getElementById('ai-generated-img').src = canvasUrl;
+            document.getElementById('inapp-preview-container').classList.remove('hidden');
+            playSoundFx('fanfare');
         }
 
         function generateCanvasRoomFallback(roomName, items) {
             const canvas = document.createElement('canvas');
-            canvas.width = 1024;
-            canvas.height = 576;
+            canvas.width = 1024; canvas.height = 576;
             const ctx = canvas.getContext('2d');
 
-            // Rich Gradient Background
             const bgGrad = ctx.createLinearGradient(0, 0, 0, 576);
             bgGrad.addColorStop(0, '#1e1b4b');
             bgGrad.addColorStop(0.6, '#312e81');
@@ -1135,51 +794,38 @@
             ctx.fillStyle = bgGrad;
             ctx.fillRect(0, 0, 1024, 576);
 
-            // Title Heading
             ctx.fillStyle = '#fef08a';
-            ctx.font = 'bold 44px Fredoka, sans-serif';
+            ctx.font = 'bold 42px Fredoka, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(`✨ ${roomName} Showcase Design ✨`, 512, 90);
+            ctx.fillText(`✨ ${roomName} Design Summary ✨`, 512, 85);
 
-            // Item summary text
             ctx.fillStyle = '#cbd5e1';
-            ctx.font = '22px Inter, sans-serif';
-            ctx.fillText(`Decorated with ${items.length} key furniture pieces!`, 512, 140);
-
-            // Render Item Cards
-            const startY = 200;
+            ctx.font = '20px Inter, sans-serif';
+            ctx.fillText(`Decorated with ${items.length} key furniture pieces!`, 512, 130);
 
             items.forEach((item, idx) => {
                 const col = idx % 4;
                 const row = Math.floor(idx / 4);
                 const x = 140 + col * 200;
-                const y = startY + row * 120;
+                const y = 180 + row * 110;
 
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
                 ctx.lineWidth = 2;
-                
                 ctx.beginPath();
-                if (ctx.roundRect) {
-                    ctx.roundRect(x, y, 180, 95, 20);
-                } else {
-                    ctx.rect(x, y, 180, 95);
-                }
-                ctx.fill();
-                ctx.stroke();
+                if (ctx.roundRect) ctx.roundRect(x, y, 180, 85, 18);
+                else ctx.rect(x, y, 180, 85);
+                ctx.fill(); ctx.stroke();
 
                 ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 20px Fredoka, sans-serif';
+                ctx.font = 'bold 18px Fredoka, sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText(item, x + 90, y + 55);
+                ctx.fillText(item, x + 90, y + 50);
             });
 
             return canvas.toDataURL('image/png');
         }
 
-        /* ==========================================================================
-           REFINED FLEXIBLE ROOM RATING LOGIC
-           ========================================================================== */
         function checkAndRateRoom() {
             const room = ROOMS[gameState.currentRoomIndex];
             const roomProg = gameState.roomData[room.id];
@@ -1187,111 +833,67 @@
 
             if (placed.length === 0) {
                 speakText("Please place some items in the room first!");
-                const feedback = document.getElementById('feedback-text');
-                if (feedback) {
-                    feedback.innerHTML = `⚠️ Add items to the <strong>${room.name}</strong> before rating!`;
-                }
+                document.getElementById('feedback-text').innerHTML = `⚠️ Add items to the <strong>${room.name}</strong> before rating!`;
                 return;
             }
 
             let keyRoomItemCount = 0;
-            let creativeAdditionCount = 0;
+            placed.forEach(p => { if (room.targetItemIds.includes(p.id)) keyRoomItemCount++; });
 
-            placed.forEach(p => {
-                if (room.targetItemIds.includes(p.id)) {
-                    keyRoomItemCount++;
-                } else {
-                    creativeAdditionCount++;
-                }
-            });
-
-            let stars = 1;
-            if (placed.length >= 3 && keyRoomItemCount >= 2) {
-                stars = 3;
-            } else if (placed.length >= 2) {
-                stars = 2;
-            } else {
-                stars = 1;
-            }
-
+            let stars = (placed.length >= 3 && keyRoomItemCount >= 2) ? 3 : (placed.length >= 2 ? 2 : 1);
             roomProg.stars = Math.max(roomProg.stars, stars);
             updateTotalStarsHeader();
             renderRoomNavPills();
 
-            const titleElem = document.getElementById('modal-room-title');
-            if (titleElem) titleElem.innerText = `${room.name} Evaluation`;
+            document.getElementById('modal-room-title').innerText = `${room.name} Evaluation`;
             
             let starsHTML = '';
             for (let i = 1; i <= 3; i++) {
-                if (i <= stars) starsHTML += `<i class="fa-solid fa-star text-amber-400"></i>`;
-                else starsHTML += `<i class="fa-solid fa-star text-slate-200"></i>`;
+                starsHTML += `<i class="fa-solid fa-star ${i <= stars ? 'text-amber-400' : 'text-slate-200'}"></i>`;
             }
-            const starsContainer = document.getElementById('modal-stars-container');
-            if (starsContainer) starsContainer.innerHTML = starsHTML;
+            document.getElementById('modal-stars-container').innerHTML = starsHTML;
 
-            // Positive, growth-oriented feedback messaging
-            let feedbackMsg = `Great design! You included ${keyRoomItemCount} key room item${keyRoomItemCount === 1 ? '' : 's'}`;
-            if (creativeAdditionCount > 0) {
-                feedbackMsg += ` and ${creativeAdditionCount} creative touch${creativeAdditionCount > 1 ? 'es' : ''}!`;
-            } else {
-                feedbackMsg += `! Perfectly themed!`;
-            }
-
-            const feedbackElem = document.getElementById('modal-feedback-msg');
-            if (feedbackElem) feedbackElem.innerText = feedbackMsg;
-
-            // Clear visual distinction in summary list
             const listContainer = document.getElementById('modal-placed-list');
-            if (listContainer) {
-                listContainer.innerHTML = '';
-                placed.forEach(p => {
-                    const itemObj = ALL_ITEMS.find(i => i.id === p.id);
-                    if (itemObj) {
-                        const isTarget = room.targetItemIds.includes(p.id);
-                        listContainer.innerHTML += `
-                            <span class="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold border flex items-center gap-1.5 ${
-                                isTarget 
-                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-300' 
-                                    : 'bg-indigo-50 text-indigo-700 border-indigo-300'
-                            }">
-                                ${itemObj.icon} ${itemObj.name} ${isTarget ? '✓ Key Item' : '✨ Creative Touch'}
-                            </span>
-                        `;
-                    }
-                });
-            }
+            listContainer.innerHTML = '';
+            placed.forEach(p => {
+                const itemObj = ALL_ITEMS.find(i => i.id === p.id);
+                if (itemObj) {
+                    const isTarget = room.targetItemIds.includes(p.id);
+                    listContainer.innerHTML += `
+                        <span class="px-3 py-1.5 rounded-xl text-xs font-bold border flex items-center gap-1.5 ${
+                            isTarget ? 'bg-emerald-50 text-emerald-700 border-emerald-300' : 'bg-indigo-50 text-indigo-700 border-indigo-300'
+                        }">
+                            ${itemObj.icon} ${itemObj.name} ${isTarget ? '✓ Key Item' : '✨ Creative Touch'}
+                        </span>
+                    `;
+                }
+            });
 
             playSoundFx('fanfare');
-            if (typeof confetti === 'function') {
-                confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
-            }
+            if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
 
             speakText(`Great job decorating the ${room.name}!`);
-            const ratingModal = document.getElementById('modal-rating');
-            if (ratingModal) ratingModal.classList.remove('hidden');
+            document.getElementById('modal-rating').classList.remove('hidden');
         }
 
         function updateTotalStarsHeader() {
             let total = 0;
-            ROOMS.forEach(r => {
-                if (gameState.roomData[r.id]) {
-                    total += gameState.roomData[r.id].stars;
-                }
-            });
-            const counter = document.getElementById('total-stars-count');
-            if (counter) counter.innerText = total;
+            ROOMS.forEach(r => { if (gameState.roomData[r.id]) total += gameState.roomData[r.id].stars; });
+            document.getElementById('total-stars-count').innerText = total;
         }
 
         function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) modal.classList.add('hidden');
+            document.getElementById(modalId).classList.add('hidden');
         }
 
         function nextRoomFromModal() {
             closeModal('modal-rating');
-            let nextIdx = (gameState.currentRoomIndex + 1) % ROOMS.length;
-            loadRoom(nextIdx);
+            loadRoom((gameState.currentRoomIndex + 1) % ROOMS.length);
         }
+
+        function openApiKeyModal() { document.getElementById('modal-api-key').classList.remove('hidden'); }
+        function saveApiKey() { closeModal('modal-api-key'); }
+        function clearApiKey() { closeModal('modal-api-key'); }
     </script>
 </body>
 </html>
