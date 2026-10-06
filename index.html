@@ -267,6 +267,9 @@
                         </span>
                         <h3 id="ai-room-title" class="text-xl font-bold text-slate-800">AI Generated Room</h3>
                     </div>
+                    <button onclick="openApiKeyModal()" class="text-xs text-indigo-600 font-bold hover:underline flex items-center gap-1 font-sans">
+                        <i class="fa-solid fa-key"></i> Configure API Key
+                    </button>
                 </div>
 
                 <div class="w-full aspect-video rounded-2xl overflow-hidden border-2 border-slate-200 shadow-inner bg-slate-900 relative group">
@@ -291,7 +294,10 @@
                 </div>
                 <h4 class="text-lg font-bold text-slate-800">Could not generate image</h4>
                 <p class="text-xs text-slate-500 font-sans max-w-sm">Make sure you have selected furniture items in the room, then try again!</p>
-                <button onclick="generateAIRoomImage()" class="px-5 py-2 bg-indigo-600 text-white font-bold rounded-xl text-sm">Try Again</button>
+                <div class="flex gap-2">
+                    <button onclick="generateAIRoomImage()" class="px-5 py-2 bg-indigo-600 text-white font-bold rounded-xl text-sm">Try Again</button>
+                    <button onclick="openApiKeyModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm">API Settings</button>
+                </div>
             </div>
 
         </div>
@@ -348,7 +354,7 @@
             </div>
 
             <h3 class="text-xl font-bold text-slate-800 mb-1">Gemini API Key</h3>
-            <p class="text-xs text-slate-500 font-sans mb-4">Required for generating 3D AI room images when hosted on GitHub Pages.</p>
+            <p class="text-xs text-slate-500 font-sans mb-4">Required for generating high-definition Gemini 3D room renders.</p>
 
             <input type="password" id="api-key-input" placeholder="Paste AI Studio API Key (AIzaSy...)" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-indigo-500 text-sm outline-none font-mono mb-3">
 
@@ -996,7 +1002,7 @@
         }
 
         /* ==========================================================================
-           AI ROOM IMAGE GENERATION (Gemini 3.1 Flash Image)
+           AI ROOM IMAGE GENERATION (With Instant Preloader & Dual Engine Fallback)
            ========================================================================== */
         async function generateAIRoomImage() {
             const room = ROOMS[gameState.currentRoomIndex];
@@ -1034,68 +1040,69 @@
 
             speakText(`Generating an AI picture for your ${room.name}...`);
 
-            const promptText = `A vibrant, highly detailed 3D styled architectural interior render of a ${room.name} featuring the following items: ${itemNames.join(', ')}. Clean lighting, cozy aesthetic, educational game background style.`;
-
-            const payload = {
-                contents: [{
-                    role: 'user',
-                    parts: [{ text: promptText }]
-                }],
-                generationConfig: {
-                    responseModalities: ['IMAGE'],
-                    imageConfig: { aspectRatio: "16:9" }
-                }
-            };
+            const cleanPrompt = `A vibrant, highly detailed 3D styled Pixar aesthetic architectural interior render of a ${room.name} with items: ${itemNames.join(', ')}. Cozy lighting, cute classroom game style, wide shot.`;
 
             const apiKey = getStoredApiKey();
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
 
-            try {
-                let response = null;
-                let delay = 1000;
-                for (let attempt = 0; attempt < 3; attempt++) {
-                    try {
-                        response = await fetch(apiUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
-                        if (response.ok) break;
-                    } catch (err) {
-                        console.warn(`Retry attempt ${attempt + 1}`, err);
+            // 1. TRY GEMINI IMAGEN API IF KEY IS SAVED
+            if (apiKey) {
+                try {
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:generateImages?key=${apiKey}`;
+                    const payload = {
+                        instances: [{ prompt: cleanPrompt }],
+                        parameters: { sampleCount: 1, aspectRatio: "16:9" }
+                    };
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        const base64Data = result?.predictions?.[0]?.bytesBase64Encoded;
+                        if (base64Data) {
+                            displayAiImage(`data:image/png;base64,${base64Data}`, `${room.name} (Gemini AI)`);
+                            return;
+                        }
                     }
-                    await new Promise(r => setTimeout(r, delay));
-                    delay *= 2;
+                } catch (err) {
+                    console.warn("Gemini API call failed, switching to instant AI engine fallback...", err);
                 }
-
-                if (!response || !response.ok) {
-                    if (!apiKey && window.location.hostname.includes('github.io')) {
-                        openApiKeyModal();
-                    }
-                    throw new Error('API Request Failed - Check API Key');
-                }
-
-                const result = await response.json();
-                const part = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-
-                if (part && part.inlineData?.data) {
-                    const imageUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-                    const imgElem = document.getElementById('ai-generated-img');
-                    if (imgElem) imgElem.src = imageUrl;
-
-                    if (loadingState) loadingState.classList.add('hidden');
-                    if (resultState) resultState.classList.remove('hidden');
-
-                    playSoundFx('fanfare');
-                    speakText(`Here is your AI generated ${room.name}!`);
-                } else {
-                    throw new Error('No image returned');
-                }
-            } catch (error) {
-                console.error("AI Image Generation Error:", error);
-                if (loadingState) loadingState.classList.add('hidden');
-                if (errorState) errorState.classList.remove('hidden');
             }
+
+            // 2. FALLBACK INSTANT RENDER ENGINE (Guarantees image generation without API errors)
+            const fallbackUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=1280&height=720&seed=${Math.floor(Math.random() * 99999)}&nologo=true`;
+            displayAiImage(fallbackUrl, `${room.name} (AI Render)`);
+        }
+
+        function displayAiImage(url, titleText) {
+            const loadingState = document.getElementById('ai-loading-state');
+            const resultState = document.getElementById('ai-result-state');
+            const errorState = document.getElementById('ai-error-state');
+            const imgElem = document.getElementById('ai-generated-img');
+
+            if (!imgElem) return;
+
+            const tempImg = new Image();
+            tempImg.onload = function() {
+                imgElem.src = url;
+                if (loadingState) loadingState.classList.add('hidden');
+                if (resultState) resultState.classList.remove('hidden');
+                if (errorState) errorState.classList.add('hidden');
+
+                playSoundFx('fanfare');
+                speakText(`Here is your AI generated picture!`);
+            };
+
+            tempImg.onerror = function() {
+                if (loadingState) loadingState.classList.add('hidden');
+                if (resultState) resultState.classList.add('hidden');
+                if (errorState) errorState.classList.remove('hidden');
+            };
+
+            tempImg.src = url;
         }
 
         /* ==========================================================================
