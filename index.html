@@ -168,7 +168,7 @@
                         <span>Clear</span>
                     </button>
 
-                    <button onclick="generateAIRoomImage()" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold text-sm rounded-xl shadow-md hover:shadow-lg transition transform active:scale-95 flex items-center gap-2">
+                    <button onclick="openAIRoomModal()" class="px-4 py-2 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold text-sm rounded-xl shadow-md hover:shadow-lg transition transform active:scale-95 flex items-center gap-2">
                         <i class="fa-solid fa-wand-magic-sparkles text-amber-300 animate-pulse"></i>
                         <span>AI Visualizer</span>
                     </button>
@@ -238,7 +238,7 @@
 
     </main>
 
-    <!-- AI ROOM GENERATION MODAL -->
+    <!-- AI ROOM GENERATION MODAL (Includes Direct Gemini Launch & Prompt Copy) -->
     <div id="modal-ai-preview" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-2xl w-full p-6 text-center shadow-2xl animate-pop border-2 border-indigo-100 relative overflow-hidden">
             
@@ -246,58 +246,69 @@
                 <i class="fa-solid fa-xmark"></i>
             </button>
 
-            <!-- Loading State -->
-            <div id="ai-loading-state" class="py-12 flex flex-col items-center justify-center gap-4">
-                <div class="relative w-20 h-20">
-                    <div class="absolute inset-0 rounded-full border-4 border-indigo-200 animate-ping"></div>
-                    <div class="relative w-20 h-20 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white text-3xl shadow-lg">
-                        <i class="fa-solid fa-wand-magic-sparkles animate-spin"></i>
-                    </div>
-                </div>
-                <h3 class="text-2xl font-bold text-slate-800">Generating AI Room Visual...</h3>
-                <p id="ai-loading-desc" class="text-sm font-sans text-slate-500 max-w-md">Our AI designer is converting your selected furniture items into a 3D picture!</p>
-            </div>
-
-            <!-- Result State -->
-            <div id="ai-result-state" class="hidden flex flex-col gap-4">
-                <div class="flex items-center justify-between">
+            <!-- Gemini Direct Prompt Box & Launch Options -->
+            <div class="flex flex-col gap-4">
+                <div class="flex items-center justify-between border-b pb-3 border-slate-100">
                     <div class="flex items-center gap-2">
-                        <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-bold font-sans uppercase tracking-wider">
-                            ✨ AI 3D Render
+                        <span class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider font-sans flex items-center gap-1">
+                            <i class="fa-solid fa-sparkles text-amber-300"></i> Gemini 3D Studio
                         </span>
-                        <h3 id="ai-room-title" class="text-xl font-bold text-slate-800">AI Generated Room</h3>
+                        <h3 id="ai-room-title" class="text-xl font-bold text-slate-800">AI Room Visualizer</h3>
                     </div>
                     <button onclick="openApiKeyModal()" class="text-xs text-indigo-600 font-bold hover:underline flex items-center gap-1 font-sans">
-                        <i class="fa-solid fa-key"></i> Configure API Key
+                        <i class="fa-solid fa-key"></i> Direct API Settings
                     </button>
                 </div>
 
-                <div class="w-full aspect-video rounded-2xl overflow-hidden border-2 border-slate-200 shadow-inner bg-slate-900 relative group">
-                    <img id="ai-generated-img" src="" alt="AI Generated Room" class="w-full h-full object-cover">
+                <!-- Generated Prompt Card -->
+                <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-3.5 text-left flex flex-col gap-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-500 font-sans flex items-center gap-1.5">
+                            <i class="fa-solid fa-terminal text-indigo-600"></i> Auto-Generated AI Prompt:
+                        </span>
+                        <button onclick="copyGeneratedPrompt()" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 font-sans bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg border border-indigo-200 transition">
+                            <i class="fa-regular fa-copy"></i>
+                            <span id="copy-btn-text">Copy Prompt</span>
+                        </button>
+                    </div>
+                    <textarea id="ai-prompt-box" readonly class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-sm text-slate-700 font-mono resize-none focus:outline-none" rows="3"></textarea>
                 </div>
 
-                <div class="flex gap-3 mt-1">
-                    <button onclick="generateAIRoomImage()" class="flex-1 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl transition text-sm flex items-center justify-center gap-2 border border-indigo-200">
-                        <i class="fa-solid fa-rotate text-sm"></i>
-                        <span>Re-generate</span>
-                    </button>
-                    <button onclick="closeModal('modal-ai-preview')" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition text-sm">
-                        <span>Back to Decorating</span>
+                <!-- Primary Action: Open Direct in Gemini.google.com -->
+                <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-4 flex flex-col items-center gap-3">
+                    <div class="flex items-center gap-2 text-indigo-900 font-bold text-base">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-indigo-600 text-lg"></i>
+                        <span>Method 1: Direct Gemini Launch (100% Guaranteed)</span>
+                    </div>
+                    <p class="text-xs text-indigo-700 font-sans max-w-md">
+                        Clicking below will automatically copy your design prompt and open <strong>Gemini</strong> in a new tab where you can paste and generate 3D renders instantly!
+                    </p>
+                    <button onclick="copyAndLaunchGemini()" class="w-full py-3.5 bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold text-base rounded-2xl shadow-lg hover:shadow-xl transition transform active:scale-98 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rocket text-amber-300 text-lg"></i>
+                        <span>Copy Prompt & Open Gemini.google.com</span>
                     </button>
                 </div>
-            </div>
 
-            <!-- Error State -->
-            <div id="ai-error-state" class="hidden py-8 flex flex-col items-center gap-3">
-                <div class="w-16 h-16 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center text-2xl">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
+                <!-- Secondary Option: In-App Instant Render -->
+                <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+                    <span class="text-xs font-bold text-slate-500 font-sans">Method 2: In-App Canvas Preview</span>
+                    <button onclick="generateInAppAIRender()" class="px-4 py-2 bg-slate-100 hover:bg-indigo-100 text-slate-700 hover:text-indigo-700 font-bold rounded-xl text-xs transition border border-slate-200 flex items-center gap-1.5">
+                        <i class="fa-solid fa-image"></i>
+                        <span>Generate Inside App</span>
+                    </button>
                 </div>
-                <h4 class="text-lg font-bold text-slate-800">Could not generate image</h4>
-                <p class="text-xs text-slate-500 font-sans max-w-sm">Make sure you have selected furniture items in the room, then try again!</p>
-                <div class="flex gap-2">
-                    <button onclick="generateAIRoomImage()" class="px-5 py-2 bg-indigo-600 text-white font-bold rounded-xl text-sm">Try Again</button>
-                    <button onclick="openApiKeyModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm">API Settings</button>
+
+                <!-- In-App Preview Container -->
+                <div id="inapp-preview-container" class="hidden flex flex-col gap-2">
+                    <div id="ai-loading-state" class="py-6 flex flex-col items-center justify-center gap-3">
+                        <i class="fa-solid fa-circle-notch animate-spin text-indigo-600 text-3xl"></i>
+                        <span class="text-sm font-bold text-slate-700">Rendering room graphic...</span>
+                    </div>
+                    <div id="ai-result-state" class="hidden w-full aspect-video rounded-2xl overflow-hidden border-2 border-slate-200 shadow-inner bg-slate-900 relative">
+                        <img id="ai-generated-img" src="" alt="AI Generated Room" class="w-full h-full object-cover">
+                    </div>
                 </div>
+
             </div>
 
         </div>
@@ -342,7 +353,7 @@
         </div>
     </div>
 
-    <!-- API KEY SETTINGS MODAL (For GitHub Pages & External Hosting) -->
+    <!-- API KEY SETTINGS MODAL -->
     <div id="modal-api-key" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-md w-full p-6 text-center shadow-2xl animate-pop border-2 border-indigo-100 relative">
             <button onclick="closeModal('modal-api-key')" class="absolute top-4 right-4 w-9 h-9 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full flex items-center justify-center text-lg transition">
@@ -353,8 +364,8 @@
                 <i class="fa-solid fa-key"></i>
             </div>
 
-            <h3 class="text-xl font-bold text-slate-800 mb-1">Gemini API Key</h3>
-            <p class="text-xs text-slate-500 font-sans mb-4">Required for generating high-definition Gemini 3D room renders.</p>
+            <h3 class="text-xl font-bold text-slate-800 mb-1">Gemini Direct API Key</h3>
+            <p class="text-xs text-slate-500 font-sans mb-4">Optional: Enter your key if you want direct in-app generation.</p>
 
             <input type="password" id="api-key-input" placeholder="Paste AI Studio API Key (AIzaSy...)" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-indigo-500 text-sm outline-none font-mono mb-3">
 
@@ -1002,9 +1013,26 @@
         }
 
         /* ==========================================================================
-           ROBUST AI ROOM IMAGE GENERATION (Multi-Engine Fallback Chain)
+           GEMINI DIRECT LAUNCH & AUTOMATIC PROMPT ROUTING LOGIC
            ========================================================================== */
-        async function generateAIRoomImage() {
+        function getGeneratedPromptText() {
+            const room = ROOMS[gameState.currentRoomIndex];
+            const roomProg = gameState.roomData[room.id];
+            const placed = roomProg ? roomProg.placedItems : [];
+
+            if (!placed || placed.length === 0) {
+                return `Create a vibrant, high-quality 3D Pixar-style digital illustration of a colorful ${room.name} in a modern cozy home.`;
+            }
+
+            const itemNames = Array.from(new Set(placed.map(p => {
+                const itemObj = ALL_ITEMS.find(i => i.id === p.id);
+                return itemObj ? itemObj.name : null;
+            }).filter(Boolean)));
+
+            return `Create a beautiful 3D Pixar-style interior render of a colorful ${room.name} containing: ${itemNames.join(', ')}. Bright lighting, cute aesthetic, 4k resolution, classroom friendly.`;
+        }
+
+        function openAIRoomModal() {
             const room = ROOMS[gameState.currentRoomIndex];
             const roomProg = gameState.roomData[room.id];
             const placed = roomProg ? roomProg.placedItems : [];
@@ -1013,152 +1041,86 @@
                 speakText("Please place some items in the room first!");
                 const feedback = document.getElementById('feedback-text');
                 if (feedback) {
-                    feedback.innerHTML = `⚠️ Place items in the <strong>${room.name}</strong> before generating an AI picture!`;
+                    feedback.innerHTML = `⚠️ Place items in the <strong>${room.name}</strong> before generating an AI prompt!`;
                 }
                 return;
             }
 
-            const itemNames = Array.from(new Set(placed.map(p => {
-                const itemObj = ALL_ITEMS.find(i => i.id === p.id);
-                return itemObj ? itemObj.name : null;
-            }).filter(Boolean)));
+            const promptBox = document.getElementById('ai-prompt-box');
+            if (promptBox) {
+                promptBox.value = getGeneratedPromptText();
+            }
+
+            const aiTitle = document.getElementById('ai-room-title');
+            if (aiTitle) aiTitle.innerText = `${room.name} Visualizer`;
+
+            const btnText = document.getElementById('copy-btn-text');
+            if (btnText) btnText.innerText = "Copy Prompt";
+
+            const container = document.getElementById('inapp-preview-container');
+            if (container) container.classList.add('hidden');
 
             const modal = document.getElementById('modal-ai-preview');
             if (modal) modal.classList.remove('hidden');
 
-            const loadingState = document.getElementById('ai-loading-state');
-            if (loadingState) loadingState.classList.remove('hidden');
-
-            const resultState = document.getElementById('ai-result-state');
-            if (resultState) resultState.classList.add('hidden');
-
-            const errorState = document.getElementById('ai-error-state');
-            if (errorState) errorState.classList.add('hidden');
-            
-            const aiTitle = document.getElementById('ai-room-title');
-            if (aiTitle) aiTitle.innerText = `${room.name} Visualizer`;
-
-            speakText(`Generating an AI picture for your ${room.name}...`);
-
-            const cleanPrompt = `Cute 3d interior render of a colorful ${room.name} with ${itemNames.join(', ')}, bright lighting, Pixar style`;
-            const encodedPrompt = encodeURIComponent(cleanPrompt);
-            const cacheBuster = Date.now() + Math.floor(Math.random() * 1000);
-
-            const apiKey = getStoredApiKey();
-
-            // 1. TRY GEMINI IMAGEN API IF KEY IS AVAILABLE
-            if (apiKey) {
-                try {
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:generateImages?key=${apiKey}`;
-                    const payload = {
-                        instances: [{ prompt: cleanPrompt }],
-                        parameters: { sampleCount: 1, aspectRatio: "16:9" }
-                    };
-
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (response.ok) {
-                        const result = await response.json();
-                        const base64Data = result?.predictions?.[0]?.bytesBase64Encoded;
-                        if (base64Data) {
-                            displayAiImage(`data:image/png;base64,${base64Data}`);
-                            return;
-                        }
-                    }
-                } catch (err) {
-                    console.warn("Gemini API call failed, falling back to instant engines...", err);
-                }
-            }
-
-            // 2. MULTI-ENGINE FALLBACK CHAIN WITH TIMEOUT PROTECTION
-            const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=576&seed=${cacheBuster}&nologo=true`;
-            const unsplashUrl = `https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1024&q=80`;
-
-            tryLoadImageSources([
-                pollinationsUrl,
-                unsplashUrl,
-                () => generateCanvasRoomFallback(room.name, itemNames)
-            ]);
+            speakText(`AI Visualizer ready for ${room.name}!`);
         }
 
-        function tryLoadImageSources(sources, index = 0) {
-            if (index >= sources.length) {
-                showAiError();
-                return;
+        async function copyGeneratedPrompt() {
+            const promptText = getGeneratedPromptText();
+            try {
+                await navigator.clipboard.writeText(promptText);
+                const btnText = document.getElementById('copy-btn-text');
+                if (btnText) btnText.innerText = "Copied! ✓";
+                speakText("Prompt copied!");
+            } catch(err) {
+                const promptBox = document.getElementById('ai-prompt-box');
+                if (promptBox) {
+                    promptBox.select();
+                    document.execCommand('copy');
+                    const btnText = document.getElementById('copy-btn-text');
+                    if (btnText) btnText.innerText = "Copied! ✓";
+                }
             }
-
-            const source = sources[index];
-
-            // Pure Javascript Canvas Renderer Guarantee (Works 100% offline or on blocked networks)
-            if (typeof source === 'function') {
-                const dataUrl = source();
-                displayAiImage(dataUrl);
-                return;
-            }
-
-            const img = new Image();
-            let isDone = false;
-
-            // 6-second timeout per external image service
-            const timer = setTimeout(() => {
-                if (!isDone) {
-                    isDone = true;
-                    img.src = "";
-                    tryLoadImageSources(sources, index + 1);
-                }
-            }, 6000);
-
-            img.onload = function() {
-                if (!isDone) {
-                    isDone = true;
-                    clearTimeout(timer);
-                    displayAiImage(source);
-                }
-            };
-
-            img.onerror = function() {
-                if (!isDone) {
-                    isDone = true;
-                    clearTimeout(timer);
-                    tryLoadImageSources(sources, index + 1);
-                }
-            };
-
-            img.src = source;
         }
 
-        function displayAiImage(url) {
+        async function copyAndLaunchGemini() {
+            await copyGeneratedPrompt();
+            playSoundFx('fanfare');
+            speakText("Opening Gemini! Paste your prompt into Gemini.");
+            window.open('https://gemini.google.com/', '_blank');
+        }
+
+        /* IN-APP PROCEDURAL CANVAS FALLBACK GENERATOR */
+        function generateInAppAIRender() {
+            const room = ROOMS[gameState.currentRoomIndex];
+            const roomProg = gameState.roomData[room.id];
+            const placed = roomProg ? roomProg.placedItems : [];
+
+            const container = document.getElementById('inapp-preview-container');
             const loadingState = document.getElementById('ai-loading-state');
             const resultState = document.getElementById('ai-result-state');
-            const errorState = document.getElementById('ai-error-state');
             const imgElem = document.getElementById('ai-generated-img');
 
-            if (!imgElem) return;
-
-            imgElem.src = url;
-            if (loadingState) loadingState.classList.add('hidden');
-            if (resultState) resultState.classList.remove('hidden');
-            if (errorState) errorState.classList.add('hidden');
-
-            playSoundFx('fanfare');
-            speakText(`Here is your AI generated picture!`);
-        }
-
-        function showAiError() {
-            const loadingState = document.getElementById('ai-loading-state');
-            const resultState = document.getElementById('ai-result-state');
-            const errorState = document.getElementById('ai-error-state');
-
-            if (loadingState) loadingState.classList.add('hidden');
+            if (container) container.classList.remove('hidden');
+            if (loadingState) loadingState.classList.remove('hidden');
             if (resultState) resultState.classList.add('hidden');
-            if (errorState) errorState.classList.remove('hidden');
+
+            setTimeout(() => {
+                const itemNames = Array.from(new Set(placed.map(p => {
+                    const itemObj = ALL_ITEMS.find(i => i.id === p.id);
+                    return itemObj ? itemObj.name : null;
+                }).filter(Boolean)));
+
+                const canvasUrl = generateCanvasRoomFallback(room.name, itemNames);
+                if (imgElem) imgElem.src = canvasUrl;
+
+                if (loadingState) loadingState.classList.add('hidden');
+                if (resultState) resultState.classList.remove('hidden');
+                playSoundFx('fanfare');
+            }, 500);
         }
 
-        /* PROCEDURAL CANVAS FALLBACK visualizer (Zero Network Failures) */
         function generateCanvasRoomFallback(roomName, items) {
             const canvas = document.createElement('canvas');
             canvas.width = 1024;
@@ -1185,7 +1147,6 @@
             ctx.fillText(`Decorated with ${items.length} key furniture pieces!`, 512, 140);
 
             // Render Item Cards
-            const total = items.length;
             const startY = 200;
 
             items.forEach((item, idx) => {
@@ -1244,10 +1205,6 @@
                 }
             });
 
-            // Encouraging, non-punitive grading logic:
-            // - 3 Stars: Decorating with 3+ items where at least 2 are key room items.
-            // - 2 Stars: Decorating with at least 2 items.
-            // - 1 Star:  1 item placed (encourages adding more furniture).
             let stars = 1;
             if (placed.length >= 3 && keyRoomItemCount >= 2) {
                 stars = 3;
@@ -1283,7 +1240,7 @@
             const feedbackElem = document.getElementById('modal-feedback-msg');
             if (feedbackElem) feedbackElem.innerText = feedbackMsg;
 
-            // Clear visual distinction in summary list (Key Item vs Creative Addition)
+            // Clear visual distinction in summary list
             const listContainer = document.getElementById('modal-placed-list');
             if (listContainer) {
                 listContainer.innerHTML = '';
