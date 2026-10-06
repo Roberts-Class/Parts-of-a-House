@@ -127,6 +127,11 @@
                 <span id="total-stars-count">0</span> / 21
             </div>
 
+            <!-- GitHub Pages API Key Config Button -->
+            <button onclick="openApiKeyModal()" class="w-11 h-11 rounded-2xl bg-slate-700 hover:bg-slate-600 text-amber-300 flex items-center justify-center transition shadow-md text-lg" title="Configure Gemini API Key">
+                <i class="fa-solid fa-key"></i>
+            </button>
+
             <button id="audio-toggle-btn" onclick="toggleAudio()" class="w-11 h-11 rounded-2xl bg-indigo-600 text-white hover:bg-indigo-500 flex items-center justify-center transition shadow-md text-lg" title="Toggle Audio">
                 <i id="audio-icon" class="fa-solid fa-volume-high"></i>
             </button>
@@ -294,7 +299,7 @@
 
     <!-- ROOM RATING / SCORE EVALUATION MODAL -->
     <div id="modal-rating" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-lg w-full p-6 text-center shadow-2xl animate-pop border-2 border-indigo-100 relative">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 text-center shadow-2xl animate-pop border-2 border-indigo-100 relative max-h-[90vh] overflow-y-auto">
             
             <button onclick="closeModal('modal-rating')" class="absolute top-4 right-4 w-9 h-9 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full flex items-center justify-center text-lg transition">
                 <i class="fa-solid fa-xmark"></i>
@@ -310,27 +315,51 @@
                 <!-- Stars injected here -->
             </div>
 
-            <p id="modal-feedback-msg" class="text-base font-bold text-indigo-700 my-2">
+            <p id="modal-feedback-msg" class="text-sm font-bold text-slate-600 mb-4 font-sans">
                 Awesome design!
             </p>
 
-            <div class="bg-slate-50 rounded-2xl p-3 border border-slate-200 my-3 text-left">
-                <span class="text-xs uppercase font-bold text-slate-400 block mb-2 font-sans">Vocabulary Summary:</span>
-                <div id="modal-placed-list" class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto custom-scrollbar">
-                    <!-- Placed item tags injected here -->
-                </div>
+            <div id="modal-placed-list" class="flex flex-wrap justify-center gap-2 mb-6 max-h-40 overflow-y-auto p-2 bg-slate-50 rounded-2xl border border-slate-200">
+                <!-- Items list injected here -->
             </div>
 
-            <div class="flex gap-3 mt-4">
-                <button onclick="closeModal('modal-rating')" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition text-sm">
-                    Keep Decorating
-                </button>
-                <button onclick="nextRoomFromModal()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition text-sm flex items-center justify-center gap-2">
+            <div class="flex gap-3">
+                <button onclick="nextRoomFromModal()" class="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl transition shadow-md flex items-center justify-center gap-2">
                     <span>Next Room</span>
-                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+                <button onclick="closeModal('modal-rating')" class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition">
+                    Close
                 </button>
             </div>
 
+        </div>
+    </div>
+
+    <!-- API KEY SETTINGS MODAL (For GitHub Pages & External Hosting) -->
+    <div id="modal-api-key" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 text-center shadow-2xl animate-pop border-2 border-indigo-100 relative">
+            <button onclick="closeModal('modal-api-key')" class="absolute top-4 right-4 w-9 h-9 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full flex items-center justify-center text-lg transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3 shadow-sm">
+                <i class="fa-solid fa-key"></i>
+            </div>
+
+            <h3 class="text-xl font-bold text-slate-800 mb-1">Gemini API Key</h3>
+            <p class="text-xs text-slate-500 font-sans mb-4">Required for generating 3D AI room images when hosted on GitHub Pages.</p>
+
+            <input type="password" id="api-key-input" placeholder="Paste AI Studio API Key (AIzaSy...)" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-indigo-500 text-sm outline-none font-mono mb-3">
+
+            <div class="flex gap-2">
+                <button onclick="saveApiKey()" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition text-sm">
+                    Save Key
+                </button>
+                <button onclick="clearApiKey()" class="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition text-sm">
+                    Clear
+                </button>
+            </div>
         </div>
     </div>
 
@@ -597,66 +626,123 @@
             });
             renderRoomNavPills();
             loadRoom(0);
+
+            // Unlock Web Audio / Speech API on initial user interaction
+            const unlockAudio = () => {
+                getAudioContext();
+                document.removeEventListener('click', unlockAudio);
+                document.removeEventListener('touchstart', unlockAudio);
+            };
+            document.addEventListener('click', unlockAudio);
+            document.addEventListener('touchstart', unlockAudio);
         };
 
+        /* ROOM NAVIGATION & SELECTION FUNCTIONS */
         function renderRoomNavPills() {
             const container = document.getElementById('room-nav-pills');
             if (!container) return;
             container.innerHTML = '';
 
-            ROOMS.forEach((room, idx) => {
-                const isSelected = idx === gameState.currentRoomIndex;
+            ROOMS.forEach((r, idx) => {
+                const isActive = idx === gameState.currentRoomIndex;
                 const pill = document.createElement('button');
                 pill.onclick = () => loadRoom(idx);
-                pill.className = `px-3.5 py-1.5 rounded-xl font-bold text-xs sm:text-sm transition flex items-center gap-2 whitespace-nowrap shadow-sm ${
-                    isSelected 
-                        ? 'bg-indigo-600 text-white border border-indigo-400' 
-                        : 'bg-slate-700/80 hover:bg-slate-700 text-slate-200 border border-slate-600'
+                pill.className = `px-3.5 py-1.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition shrink-0 border ${
+                    isActive 
+                        ? 'bg-indigo-600 text-white border-indigo-400 shadow-md' 
+                        : 'bg-slate-700/60 text-slate-300 hover:bg-slate-700 border-slate-600'
                 }`;
-                pill.innerHTML = `<i class="fa-solid ${room.icon}"></i> ${room.name}`;
+
+                const stars = gameState.roomData[r.id] ? gameState.roomData[r.id].stars : 0;
+                let starIcon = '';
+                if (stars > 0) {
+                    starIcon = `<span class="text-amber-400 text-xs"><i class="fa-solid fa-star"></i>${stars}</span>`;
+                }
+
+                pill.innerHTML = `
+                    <i class="fa-solid ${r.icon}"></i>
+                    <span>${r.name}</span>
+                    ${starIcon}
+                `;
                 container.appendChild(pill);
             });
         }
 
         function loadRoom(index) {
+            if (index < 0 || index >= ROOMS.length) return;
             gameState.currentRoomIndex = index;
-            renderRoomNavPills();
 
             const room = ROOMS[index];
 
-            const heading = document.getElementById('room-title-heading');
-            if (heading) heading.innerText = room.name;
+            // Update Header Information
+            const titleElem = document.getElementById('room-title-heading');
+            if (titleElem) titleElem.innerText = room.name;
 
             const iconElem = document.getElementById('active-room-icon-class');
             if (iconElem) iconElem.className = `fa-solid ${room.icon}`;
 
+            // Update Room Canvas Background Theme Class
             const canvas = document.getElementById('room-canvas');
             if (canvas) {
                 canvas.className = `w-full flex-1 rounded-3xl border-4 border-dashed border-white/80 relative transition-all duration-300 shadow-2xl ${room.themeClass} overflow-hidden flex flex-col justify-end p-4 min-h-0`;
             }
 
+            // Update Feedback Bar
             const feedback = document.getElementById('feedback-text');
             if (feedback) {
-                feedback.innerHTML = `Select items from the catalog to decorate the <strong>${room.name}</strong>!`;
+                feedback.innerHTML = `Welcome to the <strong>${room.name}</strong>! Drag items to decorate.`;
             }
 
-            renderCatalog();
+            renderRoomNavPills();
             renderCanvasItems();
+            renderCatalog();
             speakText(room.speechPhrase);
         }
 
-        function filterCategory(catName) {
-            gameState.activeCategory = catName;
-            ['furniture', 'appliances', 'fixtures', 'decor', 'outdoor'].forEach(c => {
-                const btn = document.getElementById(`cat-${c}`);
-                if (!btn) return;
-                if (c === catName) {
-                    btn.className = "py-2.5 rounded-xl transition flex flex-col items-center gap-1 bg-white text-indigo-600 shadow-sm border border-slate-200 font-bold";
-                } else {
-                    btn.className = "py-2.5 rounded-xl transition flex flex-col items-center gap-1 text-slate-600 hover:text-slate-900 font-bold";
+        function filterCategory(category) {
+            gameState.activeCategory = category;
+
+            ['furniture', 'appliances', 'fixtures', 'decor', 'outdoor'].forEach(cat => {
+                const btn = document.getElementById(`cat-${cat}`);
+                if (btn) {
+                    if (cat === category) {
+                        btn.className = "py-2 rounded-xl transition flex flex-col items-center gap-1 bg-white text-indigo-600 shadow-sm border border-slate-200 font-bold";
+                    } else {
+                        btn.className = "py-2 rounded-xl transition flex flex-col items-center gap-1 text-slate-600 hover:text-slate-900 font-bold";
+                    }
                 }
             });
+
             renderCatalog();
+        }
+
+        /* API KEY MANAGEMENT FOR EXTERNAL HOSTING */
+        function getStoredApiKey() {
+            return localStorage.getItem('gemini_api_key') || "";
+        }
+
+        function openApiKeyModal() {
+            const input = document.getElementById('api-key-input');
+            if (input) input.value = getStoredApiKey();
+            const modal = document.getElementById('modal-api-key');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function saveApiKey() {
+            const input = document.getElementById('api-key-input');
+            if (input) {
+                localStorage.setItem('gemini_api_key', input.value.trim());
+                speakText("API key saved");
+            }
+            closeModal('modal-api-key');
+        }
+
+        function clearApiKey() {
+            localStorage.removeItem('gemini_api_key');
+            const input = document.getElementById('api-key-input');
+            if (input) input.value = '';
+            speakText("API key cleared");
+            closeModal('modal-api-key');
         }
 
         function renderCatalog() {
@@ -669,16 +755,47 @@
             items.forEach(item => {
                 const card = document.createElement('div');
                 card.draggable = true;
-                card.className = "bg-white p-3 rounded-2xl border-2 border-slate-200 hover:border-indigo-500 shadow-sm hover:shadow-md transition flex flex-col items-center justify-center cursor-grab active:cursor-grabbing text-center group active:scale-95";
+                card.className = "bg-white p-3 rounded-2xl border-2 border-slate-200 hover:border-indigo-500 shadow-sm hover:shadow-md transition flex flex-col items-center justify-center cursor-grab active:cursor-grabbing text-center group active:scale-95 touch-none";
                 card.innerHTML = `
                     <span class="text-4xl sm:text-5xl mb-1 group-hover:scale-110 transition-transform pointer-events-none select-none">${item.icon}</span>
                     <span class="text-xs sm:text-sm font-bold text-slate-800 leading-tight pointer-events-none select-none">${item.name}</span>
                 `;
 
+                // Desktop Mouse Drag
                 card.ondragstart = (e) => {
                     draggedCatalogItemId = item.id;
                     e.dataTransfer.setData('text/plain', item.id);
                     speakText(item.name);
+                };
+
+                // Smart Board & Touch Screen Drag & Tap Support
+                let touchStartX = 0, touchStartY = 0;
+                card.ontouchstart = (e) => {
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                    draggedCatalogItemId = item.id;
+                };
+
+                card.ontouchend = (e) => {
+                    const touchEndX = e.changedTouches[0].clientX;
+                    const touchEndY = e.changedTouches[0].clientY;
+                    const canvas = document.getElementById('room-canvas');
+
+                    if (canvas) {
+                        const rect = canvas.getBoundingClientRect();
+                        if (touchEndX >= rect.left && touchEndX <= rect.right && touchEndY >= rect.top && touchEndY <= rect.bottom) {
+                            let x = ((touchEndX - rect.left) / rect.width) * 100;
+                            let y = ((touchEndY - rect.top) / rect.height) * 100;
+                            x = Math.max(8, Math.min(85, x));
+                            y = Math.max(12, Math.min(80, y));
+                            addItemToCanvas(item.id, x, y);
+                            return;
+                        }
+                    }
+
+                    if (Math.abs(touchEndX - touchStartX) < 10 && Math.abs(touchEndY - touchStartY) < 10) {
+                        addItemToCanvas(item.id);
+                    }
                 };
 
                 card.onclick = () => {
@@ -900,7 +1017,6 @@
                 return itemObj ? itemObj.name : null;
             }).filter(Boolean)));
 
-            // Show AI Modal with Loading state
             const modal = document.getElementById('modal-ai-preview');
             if (modal) modal.classList.remove('hidden');
 
@@ -931,7 +1047,7 @@
                 }
             };
 
-            const apiKey = "";
+            const apiKey = getStoredApiKey();
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
 
             try {
@@ -952,7 +1068,12 @@
                     delay *= 2;
                 }
 
-                if (!response || !response.ok) throw new Error('API Request Failed');
+                if (!response || !response.ok) {
+                    if (!apiKey && window.location.hostname.includes('github.io')) {
+                        openApiKeyModal();
+                    }
+                    throw new Error('API Request Failed - Check API Key');
+                }
 
                 const result = await response.json();
                 const part = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
@@ -1012,6 +1133,7 @@
 
             roomProg.stars = Math.max(roomProg.stars, stars);
             updateTotalStarsHeader();
+            renderRoomNavPills();
 
             const titleElem = document.getElementById('modal-room-title');
             if (titleElem) titleElem.innerText = `${room.name} Evaluation`;
