@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Room Decorator - ESL Smart Board Edition</title>
+    
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons CDN -->
@@ -132,7 +133,7 @@
         </div>
     </header>
 
-    <!-- MAIN SCREEN GRID CONTAINER (Fills 100% Remaining Vertical Height) -->
+    <!-- MAIN SCREEN GRID CONTAINER -->
     <main class="flex-1 w-full p-3 grid grid-cols-12 gap-3 overflow-hidden">
 
         <!-- LEFT COLUMN: Room Canvas Stage (7 Columns) -->
@@ -455,7 +456,7 @@
             { id: 'chandelier', name: 'Chandelier', icon: '🕯️', cat: 'decor' },
             { id: 'carpet', name: 'Carpet', icon: '🧶', cat: 'decor' },
             { id: 'curtain', name: 'Curtains', icon: '🪟', cat: 'decor' },
-            { id: 'painting', name: 'Wall Painting', icon: '🖼️️', cat: 'decor' },
+            { id: 'painting', name: 'Wall Painting', icon: '🖼', cat: 'decor' },
             { id: 'wall_clock', name: 'Wall Clock', icon: '🕒', cat: 'decor' },
             { id: 'vase', name: 'Flower Vase', icon: '🏺', cat: 'decor' },
             { id: 'teapot', name: 'Teapot', icon: '🫖', cat: 'decor' },
@@ -483,7 +484,7 @@
             { id: 'sun_lounger', name: 'Sun Lounger', icon: '🏖️', cat: 'outdoor' },
             { id: 'pool_float', name: 'Flamingo Float', icon: '🦩', cat: 'outdoor' },
             { id: 'lifebuoy', name: 'Lifebuoy', icon: '🛟', cat: 'outdoor' },
-            { id: 'umbrella', name: 'Beach Umbrella', icon: '⛱️️', cat: 'outdoor' },
+            { id: 'umbrella', name: 'Beach Umbrella', icon: '⛱', cat: 'outdoor' },
             { id: 'goggles', name: 'Goggles', icon: '🥽', cat: 'outdoor' },
             { id: 'pool_ladder', name: 'Pool Ladder', icon: '🪜', cat: 'outdoor' },
             { id: 'beach_ball', name: 'Beach Ball', icon: '🏐', cat: 'outdoor' }
@@ -930,7 +931,7 @@
                 }
             };
 
-            const apiKey = ""; // Provided by host environment or proxy
+            const apiKey = "";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
 
             try {
@@ -988,7 +989,7 @@
                 speakText("Please place some items in the room first!");
                 const feedback = document.getElementById('feedback-text');
                 if (feedback) {
-                    feedback.innerHTML = `⚠️️ Add items to the <strong>${room.name}</strong> before rating!`;
+                    feedback.innerHTML = `⚠️ Add items to the <strong>${room.name}</strong> before rating!`;
                 }
                 return;
             }
